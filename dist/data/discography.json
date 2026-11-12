@@ -1,0 +1,931 @@
+{
+  "updatedAt": "2026-11-12",
+  "scope": "프로미스나인/fromis_9 그룹 명의로 정식 발매된 국내외 고유 곡. 정규·미니·싱글 수록곡, 그룹 명의 OST·리메이크·방송 경연 발매 음원과 앨범 내 유닛곡 포함. 동일 곡 재수록·재녹음·언어별 버전·Inst.·리믹스는 최초 발매 한 번만 수록. 개별 멤버 명의 솔로·듀오·피처링 및 정식 음원 미발매 커버 제외. 발매일 오름차순, 같은 앨범은 실제 트랙 순서.",
+  "sources": [
+    {
+      "title": "fromis_9 공식 일본 사이트 디스코그래피 (2017–2023)",
+      "url": "https://www.fromis9.jp/discography"
+    },
+    {
+      "title": "Bugs 공식 음원 카탈로그: 프로미스나인 발매 앨범",
+      "url": "https://music.bugs.co.kr/artist/20047596/albums"
+    },
+    {
+      "title": "Universal Music Japan: LIKE YOU BETTER (Japanese ver.) 발매·트랙리스트",
+      "url": "https://www.universal-music.co.jp/fromis9/products/umck-7310/"
+    },
+    {
+      "title": "Genie: 불후의 명곡 2019-03-23 (다함께 차차차 2번 트랙)",
+      "url": "https://www.genie.co.kr/detail/albumInfo?axnm=81176379"
+    },
+    {
+      "title": "Bugs: 유리구두",
+      "url": "https://music.bugs.co.kr/album/689232"
+    },
+    {
+      "title": "Bugs: To. Heart",
+      "url": "https://music.bugs.co.kr/album/20143775"
+    },
+    {
+      "title": "Bugs: To. Day",
+      "url": "https://music.bugs.co.kr/album/20171348"
+    },
+    {
+      "title": "Bugs: From.9",
+      "url": "https://music.bugs.co.kr/album/20198815"
+    },
+    {
+      "title": "Bugs: 불후의 명곡 - 전설을 노래하다 (인생의 희노애락을 노래하다 작사가 김병걸)",
+      "url": "https://music.bugs.co.kr/album/20240150"
+    },
+    {
+      "title": "Bugs: FUN FACTORY",
+      "url": "https://music.bugs.co.kr/album/20258300"
+    },
+    {
+      "title": "Bugs: My Little Society",
+      "url": "https://music.bugs.co.kr/album/20349698"
+    },
+    {
+      "title": "Bugs: 9 WAY TICKET",
+      "url": "https://music.bugs.co.kr/album/20397338"
+    },
+    {
+      "title": "Bugs: Talk & Talk",
+      "url": "https://music.bugs.co.kr/album/4064450"
+    },
+    {
+      "title": "Bugs: 싸이월드 BGM 2021",
+      "url": "https://music.bugs.co.kr/album/20419820"
+    },
+    {
+      "title": "Bugs: 불후의 명곡 - 아티스트 백두산 유현상 편",
+      "url": "https://music.bugs.co.kr/album/4067793"
+    },
+    {
+      "title": "Bugs: Midnight Guest",
+      "url": "https://music.bugs.co.kr/album/4070232"
+    },
+    {
+      "title": "Bugs: 크레이지 러브 OST Part.2",
+      "url": "https://music.bugs.co.kr/album/20455872"
+    },
+    {
+      "title": "Bugs: from our Memento Box",
+      "url": "https://music.bugs.co.kr/album/4077170"
+    },
+    {
+      "title": "Bugs: 달빛바다",
+      "url": "https://music.bugs.co.kr/album/4078026"
+    },
+    {
+      "title": "Bugs: Unlock My World",
+      "url": "https://music.bugs.co.kr/album/4087396"
+    },
+    {
+      "title": "Bugs: Love Me Back (작전명 순정 X 프로미스나인)",
+      "url": "https://music.bugs.co.kr/album/4091871"
+    },
+    {
+      "title": "Bugs: Supersonic",
+      "url": "https://music.bugs.co.kr/album/4105386"
+    },
+    {
+      "title": "Bugs: from",
+      "url": "https://music.bugs.co.kr/album/4112113"
+    },
+    {
+      "title": "Bugs: From Our 20's",
+      "url": "https://music.bugs.co.kr/album/20735911"
+    },
+    {
+      "title": "Bugs: 트라이 OST Part.2",
+      "url": "https://music.bugs.co.kr/album/4124391"
+    },
+    {
+      "title": "Bugs: 하얀 그리움",
+      "url": "https://music.bugs.co.kr/album/20774246"
+    },
+    {
+      "title": "Bugs: 월간남친 Part 2 (Soundtrack from the Netflix Series)",
+      "url": "https://music.bugs.co.kr/album/4143170"
+    },
+    {
+      "title": "Bugs: LIKE YOU BETTER (Japanese ver.)",
+      "url": "https://music.bugs.co.kr/album/4144419"
+    },
+    {
+      "title": "Bugs: Glow ME",
+      "url": "https://music.bugs.co.kr/album/20827312"
+    },
+    {
+      "title": "Apple Music: From Our 20's (2025-06-25)",
+      "url": "https://music.apple.com/kr/album/from-our-20s-ep/1821787094"
+    },
+    {
+      "title": "Apple Music: 하얀 그리움 (2025-12-02)",
+      "url": "https://music.apple.com/kr/album/white-memories-single/1856551390"
+    },
+    {
+      "title": "Apple Music: 월간남친 OST Part 2 (2026-03-17)",
+      "url": "https://music.apple.com/kr/album/boyfriend-on-demand-part-2-soundtrack-from-the/1884557901"
+    },
+    {
+      "title": "Apple Music: Glow ME (2026-07-21)",
+      "url": "https://music.apple.com/kr/album/glow-me/6791520495"
+    }
+  ],
+  "albums": [
+    {
+      "id": "glass-shoes",
+      "title": "유리구두",
+      "date": "2017-11-30",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/6892/689232.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/689232",
+        "https://www.fromis9.jp/discography"
+      ],
+      "cover": "assets/covers/glass-shoes.jpg"
+    },
+    {
+      "id": "to-heart",
+      "title": "To. Heart",
+      "date": "2018-01-24",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/201437/20143775.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/20143775",
+        "https://www.fromis9.jp/discography"
+      ],
+      "cover": "assets/covers/to-heart.jpg"
+    },
+    {
+      "id": "to-day",
+      "title": "To. Day",
+      "date": "2018-06-05",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/201713/20171348.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/20171348",
+        "https://www.fromis9.jp/discography"
+      ],
+      "cover": "assets/covers/to-day.jpg"
+    },
+    {
+      "id": "from-9",
+      "title": "From.9",
+      "date": "2018-10-10",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/201988/20198815.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/20198815",
+        "https://www.fromis9.jp/discography"
+      ],
+      "cover": "assets/covers/from-9.jpg"
+    },
+    {
+      "id": "immortal-songs-2019",
+      "title": "불후의 명곡 - 전설을 노래하다 (인생의 희노애락을 노래하다 작사가 김병걸)",
+      "date": "2019-03-23",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/202401/20240150.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/20240150",
+        "https://www.genie.co.kr/detail/albumInfo?axnm=81176379"
+      ],
+      "cover": "assets/covers/immortal-songs-2019.jpg"
+    },
+    {
+      "id": "fun-factory",
+      "title": "FUN FACTORY",
+      "date": "2019-06-04",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/202583/20258300.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/20258300",
+        "https://www.fromis9.jp/discography"
+      ],
+      "cover": "assets/covers/fun-factory.jpg"
+    },
+    {
+      "id": "my-little-society",
+      "title": "My Little Society",
+      "date": "2020-09-16",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/203496/20349698.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/20349698",
+        "https://www.fromis9.jp/discography"
+      ],
+      "cover": "assets/covers/my-little-society.jpg"
+    },
+    {
+      "id": "9-way-ticket",
+      "title": "9 WAY TICKET",
+      "date": "2021-05-17",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/203973/20397338.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/20397338",
+        "https://www.fromis9.jp/discography"
+      ],
+      "cover": "assets/covers/9-way-ticket.jpg"
+    },
+    {
+      "id": "talk-and-talk",
+      "title": "Talk & Talk",
+      "date": "2021-09-01",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/40644/4064450.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/4064450",
+        "https://www.fromis9.jp/discography"
+      ],
+      "cover": "assets/covers/talk-and-talk.jpg"
+    },
+    {
+      "id": "cyworld-bgm-2021",
+      "title": "싸이월드 BGM 2021",
+      "date": "2021-09-08",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/204198/20419820.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/20419820"
+      ],
+      "cover": "assets/covers/cyworld-bgm-2021.jpg"
+    },
+    {
+      "id": "immortal-songs-2021",
+      "title": "불후의 명곡 - 아티스트 백두산 유현상 편",
+      "date": "2021-11-20",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/40677/4067793.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/4067793"
+      ],
+      "cover": "assets/covers/immortal-songs-2021.jpg"
+    },
+    {
+      "id": "midnight-guest",
+      "title": "Midnight Guest",
+      "date": "2022-01-17",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/40702/4070232.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/4070232",
+        "https://www.fromis9.jp/discography"
+      ],
+      "cover": "assets/covers/midnight-guest.jpg"
+    },
+    {
+      "id": "crazy-love-ost-part-2",
+      "title": "크레이지 러브 OST Part.2",
+      "date": "2022-03-15",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/204558/20455872.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/20455872"
+      ],
+      "cover": "assets/covers/crazy-love-ost-part-2.jpg"
+    },
+    {
+      "id": "from-our-memento-box",
+      "title": "from our Memento Box",
+      "date": "2022-06-27",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/40771/4077170.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/4077170",
+        "https://www.fromis9.jp/discography"
+      ],
+      "cover": "assets/covers/from-our-memento-box.jpg"
+    },
+    {
+      "id": "sea-of-moonlight",
+      "title": "달빛바다",
+      "date": "2022-07-24",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/40780/4078026.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/4078026"
+      ],
+      "cover": "assets/covers/sea-of-moonlight.jpg"
+    },
+    {
+      "id": "unlock-my-world",
+      "title": "Unlock My World",
+      "date": "2023-06-05",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/40873/4087396.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/4087396",
+        "https://www.fromis9.jp/discography"
+      ],
+      "cover": "assets/covers/unlock-my-world.jpg"
+    },
+    {
+      "id": "love-me-back",
+      "title": "Love Me Back (작전명 순정 X 프로미스나인)",
+      "date": "2023-10-11",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/40918/4091871.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/4091871"
+      ],
+      "cover": "assets/covers/love-me-back.jpg"
+    },
+    {
+      "id": "supersonic",
+      "title": "Supersonic",
+      "date": "2024-08-12",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/41053/4105386.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/4105386"
+      ],
+      "cover": "assets/covers/supersonic.jpg"
+    },
+    {
+      "id": "from",
+      "title": "from",
+      "date": "2024-12-23",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/41121/4112113.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/4112113"
+      ],
+      "cover": "assets/covers/from.jpg"
+    },
+    {
+      "id": "from-our-20s",
+      "title": "From Our 20's",
+      "date": "2025-06-25",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/207359/20735911.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/20735911"
+      ],
+      "cover": "assets/covers/from-our-20s.jpg"
+    },
+    {
+      "id": "the-winning-try-ost-part-2",
+      "title": "트라이 OST Part.2",
+      "date": "2025-08-01",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/41243/4124391.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/4124391"
+      ],
+      "cover": "assets/covers/the-winning-try-ost-part-2.jpg"
+    },
+    {
+      "id": "white-memories",
+      "title": "하얀 그리움",
+      "date": "2025-12-02",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/207742/20774246.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/20774246"
+      ],
+      "cover": "assets/covers/white-memories.jpg"
+    },
+    {
+      "id": "boyfriend-on-demand-part-2",
+      "title": "월간남친 Part 2 (Soundtrack from the Netflix Series)",
+      "date": "2026-03-17",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/41431/4143170.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/4143170"
+      ],
+      "cover": "assets/covers/boyfriend-on-demand-part-2.jpg"
+    },
+    {
+      "id": "like-you-better-japanese",
+      "title": "LIKE YOU BETTER (Japanese ver.)",
+      "date": "2026-04-01",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/41444/4144419.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/4144419",
+        "https://www.universal-music.co.jp/fromis9/products/umck-7310/"
+      ],
+      "cover": "assets/covers/like-you-better-japanese.jpg"
+    },
+    {
+      "id": "glow-me",
+      "title": "Glow ME",
+      "date": "2026-07-21",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/208273/20827312.jpg",
+      "sources": [
+        "https://music.bugs.co.kr/album/20827312"
+      ],
+      "cover": "assets/covers/glow-me.jpg"
+    }
+  ],
+  "tracks": [
+    {
+      "id": "glass-shoes-01",
+      "title": "유리구두",
+      "albumId": "glass-shoes",
+      "trackNumber": 1,
+      "aliases": [
+        "Glass Shoes",
+        "유리구두 (Glass Shoes)"
+      ]
+    },
+    {
+      "id": "to-heart-01",
+      "title": "나에게로 오는 길 (Intro.)",
+      "albumId": "to-heart",
+      "trackNumber": 1,
+      "aliases": [
+        "The Way To Me (Intro.)"
+      ]
+    },
+    {
+      "id": "to-heart-02",
+      "title": "To Heart",
+      "albumId": "to-heart",
+      "trackNumber": 2
+    },
+    {
+      "id": "to-heart-03",
+      "title": "환상속의 그대",
+      "albumId": "to-heart",
+      "trackNumber": 3,
+      "aliases": [
+        "Miracle"
+      ]
+    },
+    {
+      "id": "to-heart-04",
+      "title": "피노키오",
+      "albumId": "to-heart",
+      "trackNumber": 4,
+      "aliases": [
+        "Pinocchio"
+      ]
+    },
+    {
+      "id": "to-heart-05",
+      "title": "Be With You",
+      "albumId": "to-heart",
+      "trackNumber": 5
+    },
+    {
+      "id": "to-day-01",
+      "title": "다가가고 싶어",
+      "albumId": "to-day",
+      "trackNumber": 1,
+      "aliases": [
+        "Close To You"
+      ]
+    },
+    {
+      "id": "to-day-02",
+      "title": "너를 따라, 너에게",
+      "albumId": "to-day",
+      "trackNumber": 2,
+      "aliases": [
+        "Think of You"
+      ]
+    },
+    {
+      "id": "to-day-03",
+      "title": "두근두근(DKDK)",
+      "albumId": "to-day",
+      "trackNumber": 3,
+      "aliases": [
+        "두근두근 (DKDK)",
+        "Pitapat (DKDK)",
+        "DKDK"
+      ]
+    },
+    {
+      "id": "to-day-04",
+      "title": "22세기 소녀",
+      "albumId": "to-day",
+      "trackNumber": 4,
+      "aliases": [
+        "22Century Girls",
+        "22Century Girl"
+      ]
+    },
+    {
+      "id": "to-day-05",
+      "title": "CLOVER",
+      "albumId": "to-day",
+      "trackNumber": 5
+    },
+    {
+      "id": "to-day-06",
+      "title": "FIRST LOVE",
+      "albumId": "to-day",
+      "trackNumber": 6
+    },
+    {
+      "id": "from-9-01",
+      "title": "LOVE BOMB",
+      "albumId": "from-9",
+      "trackNumber": 1
+    },
+    {
+      "id": "from-9-02",
+      "title": "DANCING QUEEN",
+      "albumId": "from-9",
+      "trackNumber": 2
+    },
+    {
+      "id": "from-9-03",
+      "title": "물들어",
+      "albumId": "from-9",
+      "trackNumber": 3,
+      "aliases": [
+        "Coloring"
+      ]
+    },
+    {
+      "id": "immortal-songs-2019-02",
+      "title": "다함께 차차차",
+      "albumId": "immortal-songs-2019",
+      "trackNumber": 2,
+      "aliases": [
+        "All Together Cha Cha Cha"
+      ]
+    },
+    {
+      "id": "fun-factory-01",
+      "title": "FUN!",
+      "albumId": "fun-factory",
+      "trackNumber": 1
+    },
+    {
+      "id": "fun-factory-02",
+      "title": "LOVE RUMPUMPUM",
+      "albumId": "fun-factory",
+      "trackNumber": 2
+    },
+    {
+      "id": "fun-factory-03",
+      "title": "FLY HIGH",
+      "albumId": "fun-factory",
+      "trackNumber": 3
+    },
+    {
+      "id": "my-little-society-01",
+      "title": "Feel Good (SECRET CODE)",
+      "albumId": "my-little-society",
+      "trackNumber": 1
+    },
+    {
+      "id": "my-little-society-02",
+      "title": "Weather",
+      "albumId": "my-little-society",
+      "trackNumber": 2
+    },
+    {
+      "id": "my-little-society-03",
+      "title": "별의 밤",
+      "albumId": "my-little-society",
+      "trackNumber": 3,
+      "aliases": [
+        "Starry Night",
+        "Starry night"
+      ]
+    },
+    {
+      "id": "my-little-society-04",
+      "title": "Somebody to love",
+      "albumId": "my-little-society",
+      "trackNumber": 4
+    },
+    {
+      "id": "my-little-society-05",
+      "title": "물고기",
+      "albumId": "my-little-society",
+      "trackNumber": 5,
+      "aliases": [
+        "Mulgogi"
+      ]
+    },
+    {
+      "id": "9-way-ticket-01",
+      "title": "Airplane Mode",
+      "albumId": "9-way-ticket",
+      "trackNumber": 1
+    },
+    {
+      "id": "9-way-ticket-02",
+      "title": "WE GO",
+      "albumId": "9-way-ticket",
+      "trackNumber": 2
+    },
+    {
+      "id": "9-way-ticket-03",
+      "title": "Promise",
+      "albumId": "9-way-ticket",
+      "trackNumber": 3
+    },
+    {
+      "id": "talk-and-talk-01",
+      "title": "Talk & Talk",
+      "albumId": "talk-and-talk",
+      "trackNumber": 1
+    },
+    {
+      "id": "cyworld-bgm-2021-01",
+      "title": "별",
+      "albumId": "cyworld-bgm-2021",
+      "trackNumber": 1,
+      "aliases": [
+        "Star"
+      ]
+    },
+    {
+      "id": "immortal-songs-2021-01",
+      "title": "난 사랑을 아직 몰라",
+      "albumId": "immortal-songs-2021",
+      "trackNumber": 1,
+      "aliases": []
+    },
+    {
+      "id": "midnight-guest-01",
+      "title": "Escape Room",
+      "albumId": "midnight-guest",
+      "trackNumber": 1
+    },
+    {
+      "id": "midnight-guest-02",
+      "title": "DM",
+      "albumId": "midnight-guest",
+      "trackNumber": 2
+    },
+    {
+      "id": "midnight-guest-03",
+      "title": "Love is Around",
+      "albumId": "midnight-guest",
+      "trackNumber": 3
+    },
+    {
+      "id": "midnight-guest-04",
+      "title": "Hush Hush",
+      "albumId": "midnight-guest",
+      "trackNumber": 4
+    },
+    {
+      "id": "midnight-guest-05",
+      "title": "0g",
+      "albumId": "midnight-guest",
+      "trackNumber": 5
+    },
+    {
+      "id": "crazy-love-ost-part-2-01",
+      "title": "Stay Alive",
+      "albumId": "crazy-love-ost-part-2",
+      "trackNumber": 1
+    },
+    {
+      "id": "from-our-memento-box-01",
+      "title": "Up And",
+      "albumId": "from-our-memento-box",
+      "trackNumber": 1
+    },
+    {
+      "id": "from-our-memento-box-02",
+      "title": "Stay This Way",
+      "albumId": "from-our-memento-box",
+      "trackNumber": 2
+    },
+    {
+      "id": "from-our-memento-box-03",
+      "title": "Blind Letter",
+      "albumId": "from-our-memento-box",
+      "trackNumber": 3
+    },
+    {
+      "id": "from-our-memento-box-04",
+      "title": "Cheese",
+      "albumId": "from-our-memento-box",
+      "trackNumber": 4
+    },
+    {
+      "id": "from-our-memento-box-05",
+      "title": "Rewind",
+      "albumId": "from-our-memento-box",
+      "trackNumber": 5
+    },
+    {
+      "id": "sea-of-moonlight-01",
+      "title": "달빛바다",
+      "albumId": "sea-of-moonlight",
+      "trackNumber": 1,
+      "aliases": [
+        "Sea of Moonlight"
+      ]
+    },
+    {
+      "id": "unlock-my-world-01",
+      "title": "Attitude",
+      "albumId": "unlock-my-world",
+      "trackNumber": 1
+    },
+    {
+      "id": "unlock-my-world-02",
+      "title": "#menow",
+      "albumId": "unlock-my-world",
+      "trackNumber": 2
+    },
+    {
+      "id": "unlock-my-world-03",
+      "title": "Wishlist",
+      "albumId": "unlock-my-world",
+      "trackNumber": 3
+    },
+    {
+      "id": "unlock-my-world-04",
+      "title": "In the Mirror",
+      "albumId": "unlock-my-world",
+      "trackNumber": 4
+    },
+    {
+      "id": "unlock-my-world-05",
+      "title": "Don't Care",
+      "albumId": "unlock-my-world",
+      "trackNumber": 5
+    },
+    {
+      "id": "unlock-my-world-06",
+      "title": "Prom Night",
+      "albumId": "unlock-my-world",
+      "trackNumber": 6
+    },
+    {
+      "id": "unlock-my-world-07",
+      "title": "Bring It On",
+      "albumId": "unlock-my-world",
+      "trackNumber": 7
+    },
+    {
+      "id": "unlock-my-world-08",
+      "title": "What I Want",
+      "albumId": "unlock-my-world",
+      "trackNumber": 8
+    },
+    {
+      "id": "unlock-my-world-09",
+      "title": "My Night Routine",
+      "albumId": "unlock-my-world",
+      "trackNumber": 9
+    },
+    {
+      "id": "unlock-my-world-10",
+      "title": "눈맞춤",
+      "albumId": "unlock-my-world",
+      "trackNumber": 10,
+      "aliases": [
+        "Eye Contact",
+        "눈맞춤 (Eye Contact)"
+      ]
+    },
+    {
+      "id": "love-me-back-01",
+      "title": "Love Me Back",
+      "albumId": "love-me-back",
+      "trackNumber": 1
+    },
+    {
+      "id": "supersonic-01",
+      "title": "Supersonic",
+      "albumId": "supersonic",
+      "trackNumber": 1
+    },
+    {
+      "id": "supersonic-02",
+      "title": "Beat the Heat",
+      "albumId": "supersonic",
+      "trackNumber": 2
+    },
+    {
+      "id": "supersonic-03",
+      "title": "Take A Chance",
+      "albumId": "supersonic",
+      "trackNumber": 3
+    },
+    {
+      "id": "from-01",
+      "title": "from",
+      "albumId": "from",
+      "trackNumber": 1
+    },
+    {
+      "id": "from-our-20s-01",
+      "title": "LIKE YOU BETTER",
+      "albumId": "from-our-20s",
+      "trackNumber": 1
+    },
+    {
+      "id": "from-our-20s-02",
+      "title": "REBELUTIONAL",
+      "albumId": "from-our-20s",
+      "trackNumber": 2
+    },
+    {
+      "id": "from-our-20s-03",
+      "title": "Love=Disaster",
+      "albumId": "from-our-20s",
+      "trackNumber": 3
+    },
+    {
+      "id": "from-our-20s-04",
+      "title": "Strawberry Mimosa",
+      "albumId": "from-our-20s",
+      "trackNumber": 4
+    },
+    {
+      "id": "from-our-20s-05",
+      "title": "Twisted love",
+      "albumId": "from-our-20s",
+      "trackNumber": 5,
+      "aliases": [
+        "Twisted Love"
+      ]
+    },
+    {
+      "id": "from-our-20s-06",
+      "title": "Merry Go Round",
+      "albumId": "from-our-20s",
+      "trackNumber": 6
+    },
+    {
+      "id": "the-winning-try-ost-part-2-01",
+      "title": "Touchdown",
+      "albumId": "the-winning-try-ost-part-2",
+      "trackNumber": 1
+    },
+    {
+      "id": "white-memories-01",
+      "title": "하얀 그리움",
+      "albumId": "white-memories",
+      "trackNumber": 1,
+      "aliases": [
+        "White Memories"
+      ]
+    },
+    {
+      "id": "boyfriend-on-demand-part-2-01",
+      "title": "Swipe It Out",
+      "albumId": "boyfriend-on-demand-part-2",
+      "trackNumber": 1
+    },
+    {
+      "id": "like-you-better-japanese-03",
+      "title": "Sky Runner",
+      "albumId": "like-you-better-japanese",
+      "trackNumber": 3
+    },
+    {
+      "id": "glow-me-01",
+      "title": "ETERNAL",
+      "albumId": "glow-me",
+      "trackNumber": 1
+    },
+    {
+      "id": "glow-me-02",
+      "title": "Vitamin ME",
+      "albumId": "glow-me",
+      "trackNumber": 2
+    },
+    {
+      "id": "glow-me-03",
+      "title": "Pocket Treat",
+      "albumId": "glow-me",
+      "trackNumber": 3
+    },
+    {
+      "id": "glow-me-04",
+      "title": "Blue Heart",
+      "albumId": "glow-me",
+      "trackNumber": 4
+    },
+    {
+      "id": "glow-me-05",
+      "title": "Screen Time",
+      "albumId": "glow-me",
+      "trackNumber": 5
+    },
+    {
+      "id": "glow-me-06",
+      "title": "Teacher",
+      "albumId": "glow-me",
+      "trackNumber": 6
+    },
+    {
+      "id": "glow-me-07",
+      "title": "Cold Blood",
+      "albumId": "glow-me",
+      "trackNumber": 7
+    },
+    {
+      "id": "glow-me-08",
+      "title": "Why do I cry?",
+      "albumId": "glow-me",
+      "trackNumber": 8,
+      "aliases": [
+        "Why Do I Cry?"
+      ]
+    },
+    {
+      "id": "glow-me-09",
+      "title": "Day 1",
+      "albumId": "glow-me",
+      "trackNumber": 9,
+      "aliases": [
+        "DAY 1"
+      ]
+    },
+    {
+      "id": "glow-me-10",
+      "title": "Wonderland",
+      "albumId": "glow-me",
+      "trackNumber": 10
+    }
+  ]
+}

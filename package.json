@@ -1,0 +1,11 @@
+{
+  "name": "fromis-typing-journey",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node dev.mjs",
+    "test": "node --test --test-isolation=none tests/*.test.mjs",
+    "check": "node scripts/check-data.mjs"
+  }
+}

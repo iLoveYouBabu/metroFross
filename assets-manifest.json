@@ -1,0 +1,281 @@
+{
+  "updatedAt": "2026-11-12",
+  "source": "Bugs official streaming service album artwork",
+  "assets": [
+    {
+      "id": "9-way-ticket",
+      "title": "9 WAY TICKET",
+      "path": "assets/covers/9-way-ticket.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/203973/20397338.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/20397338",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 83361
+    },
+    {
+      "id": "boyfriend-on-demand-part-2",
+      "title": "월간남친 Part 2 (Soundtrack from the Netflix Series)",
+      "path": "assets/covers/boyfriend-on-demand-part-2.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/41431/4143170.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/4143170",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 104235
+    },
+    {
+      "id": "crazy-love-ost-part-2",
+      "title": "크레이지 러브 OST Part.2",
+      "path": "assets/covers/crazy-love-ost-part-2.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/204558/20455872.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/20455872",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 97041
+    },
+    {
+      "id": "cyworld-bgm-2021",
+      "title": "싸이월드 BGM 2021",
+      "path": "assets/covers/cyworld-bgm-2021.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/204198/20419820.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/20419820",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 71458
+    },
+    {
+      "id": "from",
+      "title": "from",
+      "path": "assets/covers/from.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/41121/4112113.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/4112113",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 95297
+    },
+    {
+      "id": "from-9",
+      "title": "From.9",
+      "path": "assets/covers/from-9.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/201988/20198815.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/20198815",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 146388
+    },
+    {
+      "id": "from-our-20s",
+      "title": "From Our 20's",
+      "path": "assets/covers/from-our-20s.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/207359/20735911.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/20735911",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 131855
+    },
+    {
+      "id": "from-our-memento-box",
+      "title": "from our Memento Box",
+      "path": "assets/covers/from-our-memento-box.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/40771/4077170.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/4077170",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 26472
+    },
+    {
+      "id": "fun-factory",
+      "title": "FUN FACTORY",
+      "path": "assets/covers/fun-factory.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/202583/20258300.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/20258300",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 99759
+    },
+    {
+      "id": "glass-shoes",
+      "title": "유리구두",
+      "path": "assets/covers/glass-shoes.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/6892/689232.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/689232",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 64019
+    },
+    {
+      "id": "glow-me",
+      "title": "Glow ME",
+      "path": "assets/covers/glow-me.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/208273/20827312.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/20827312",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 83860
+    },
+    {
+      "id": "immortal-songs-2019",
+      "title": "<불후의 명곡 - 전설을 노래하다> - 인생의 희노애락을 노래하다 작사가 김병걸",
+      "path": "assets/covers/immortal-songs-2019.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/202401/20240150.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/20240150",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 103544
+    },
+    {
+      "id": "immortal-songs-2021",
+      "title": "<불후의 명곡> - 아티스트 백두산 유현상 편",
+      "path": "assets/covers/immortal-songs-2021.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/40677/4067793.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/4067793",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 98397
+    },
+    {
+      "id": "like-you-better-japanese",
+      "title": "LIKE YOU BETTER (Japanese ver.)",
+      "path": "assets/covers/like-you-better-japanese.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/41444/4144419.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/4144419",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 119672
+    },
+    {
+      "id": "love-me-back",
+      "title": "Love Me Back (작전명 순정 X 프로미스나인)",
+      "path": "assets/covers/love-me-back.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/40918/4091871.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/4091871",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 108319
+    },
+    {
+      "id": "midnight-guest",
+      "title": "Midnight Guest",
+      "path": "assets/covers/midnight-guest.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/40702/4070232.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/4070232",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 108973
+    },
+    {
+      "id": "my-little-society",
+      "title": "My Little Society",
+      "path": "assets/covers/my-little-society.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/203496/20349698.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/20349698",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 109663
+    },
+    {
+      "id": "sea-of-moonlight",
+      "title": "달빛바다",
+      "path": "assets/covers/sea-of-moonlight.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/40780/4078026.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/4078026",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 157127
+    },
+    {
+      "id": "supersonic",
+      "title": "Supersonic",
+      "path": "assets/covers/supersonic.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/41053/4105386.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/4105386",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 124976
+    },
+    {
+      "id": "talk-and-talk",
+      "title": "Talk & Talk",
+      "path": "assets/covers/talk-and-talk.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/40644/4064450.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/4064450",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 61196
+    },
+    {
+      "id": "the-winning-try-ost-part-2",
+      "title": "트라이 OST Part.2",
+      "path": "assets/covers/the-winning-try-ost-part-2.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/41243/4124391.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/4124391",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 129666
+    },
+    {
+      "id": "to-day",
+      "title": "To. Day",
+      "path": "assets/covers/to-day.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/201713/20171348.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/20171348",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 90477
+    },
+    {
+      "id": "to-heart",
+      "title": "To. Heart",
+      "path": "assets/covers/to-heart.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/201437/20143775.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/20143775",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 103183
+    },
+    {
+      "id": "unlock-my-world",
+      "title": "Unlock My World",
+      "path": "assets/covers/unlock-my-world.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/40873/4087396.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/4087396",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 53550
+    },
+    {
+      "id": "white-memories",
+      "title": "하얀 그리움",
+      "path": "assets/covers/white-memories.jpg",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/500/207742/20774246.jpg",
+      "sourceUrl": "https://music.bugs.co.kr/album/20774246",
+      "sourceCatalog": "https://music.bugs.co.kr/artist/20047596/albums",
+      "width": 500,
+      "height": 500,
+      "bytes": 75682
+    }
+  ]
+}
