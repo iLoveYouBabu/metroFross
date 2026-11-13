@@ -1,0 +1,1064 @@
+{
+  "updatedAt": "2026-11-14",
+  "scope": "상업적으로 정식 발매된 프로미스나인 실물 앨범(정규·미니/EP·실물 싱글 앨범) 14종의 고유 곡 67곡. 디지털 싱글·OST·외부 프로젝트·경연 컴필레이션은 제외한다. 선택된 실물 발매 안에서 최초 수록된 위치를 기준으로 발매일·실제 트랙 번호 순서로 입력하며 같은 곡의 재수록·재녹음·언어별 버전·반주는 한 번만 처리한다. 디지털 선공개 뒤 실물 앨범에 들어간 곡은 제외하지 않고 해당 실물 수록 위치에서 포함한다. 일본 EP는 실물 발매 근거로 포함하며 초동 차트 값의 유무는 별도 검증한다.",
+  "albums": [
+    {
+      "id": "to-heart",
+      "title": "To. Heart",
+      "date": "2018-01-24",
+      "cover": "assets/covers/to-heart.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/201437/20143775.jpg",
+      "category": "ep",
+      "categoryLabel": "미니 앨범",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 6,
+      "sources": [
+        "https://music.bugs.co.kr/album/20143775",
+        "https://www.fromis9.jp/discography",
+        "https://m.yes24.com/goods/detail/58072601"
+      ],
+      "physicalEvidence": {
+        "publisher": "YES24",
+        "url": "https://m.yes24.com/goods/detail/58072601",
+        "details": "신품 CD 상품의 발매일 2018-01-24, 앨범 사양 CD와 디스크 6번 유리구두 (MAMA Ver.)를 확인."
+      },
+      "note": "실물 코스 첫 앨범. 6번 유리구두 (MAMA Ver.)를 이 코스 안의 최초 수록으로 포함하고 화면에는 대표 제목 유리구두를 표시한다."
+    },
+    {
+      "id": "to-day",
+      "title": "To. Day",
+      "date": "2018-06-05",
+      "cover": "assets/covers/to-day.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/201713/20171348.jpg",
+      "category": "ep",
+      "categoryLabel": "미니 앨범",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 6,
+      "sources": [
+        "https://music.bugs.co.kr/album/20171348",
+        "https://www.fromis9.jp/discography",
+        "https://m.yes24.com/Goods/Detail/61248947"
+      ],
+      "physicalEvidence": {
+        "publisher": "YES24",
+        "url": "https://m.yes24.com/Goods/Detail/61248947",
+        "details": "신품 미니 2집 CD와 D-1 / D-Day 두 판본, 발매일 2018-06-05를 확인."
+      }
+    },
+    {
+      "id": "from-9",
+      "title": "From.9",
+      "date": "2018-10-10",
+      "cover": "assets/covers/from-9.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/201988/20198815.jpg",
+      "category": "single",
+      "categoryLabel": "싱글",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 3,
+      "sources": [
+        "https://music.bugs.co.kr/album/20198815",
+        "https://www.fromis9.jp/discography",
+        "https://global.yes24.com/Goods/64744913"
+      ],
+      "physicalEvidence": {
+        "publisher": "YES24",
+        "url": "https://global.yes24.com/Goods/64744913",
+        "details": "스페셜 싱글 From.9의 CD 상품과 최초 발매일 2018-10-10을 확인."
+      },
+      "note": "CD 전용 4·5번 두근두근(DKDK)와 22세기 소녀의 From.9 버전은 최초 발매와 중복이므로 제외한다."
+    },
+    {
+      "id": "fun-factory",
+      "title": "FUN FACTORY",
+      "date": "2019-06-04",
+      "cover": "assets/covers/fun-factory.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/202583/20258300.jpg",
+      "category": "single",
+      "categoryLabel": "싱글",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 3,
+      "sources": [
+        "https://music.bugs.co.kr/album/20258300",
+        "https://www.fromis9.jp/discography",
+        "https://www.ktown4u.com/iteminfo?goods_no=38300"
+      ],
+      "physicalEvidence": {
+        "publisher": "Ktown4u",
+        "url": "https://www.ktown4u.com/iteminfo?goods_no=38300",
+        "details": "싱글 앨범 FUN FACTORY의 상품 구성에 CD가 명시되어 실물 발매를 확인. 판매처 배송·입고일과 최초 국내 발매일을 구분."
+      }
+    },
+    {
+      "id": "my-little-society",
+      "title": "My Little Society",
+      "date": "2020-09-16",
+      "cover": "assets/covers/my-little-society.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/203496/20349698.jpg",
+      "category": "ep",
+      "categoryLabel": "미니 앨범",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 5,
+      "sources": [
+        "https://music.bugs.co.kr/album/20349698",
+        "https://www.fromis9.jp/discography",
+        "https://shop.weverse.io/en/shop/USD/artists/35/sales/5084"
+      ],
+      "physicalEvidence": {
+        "publisher": "Weverse Shop",
+        "url": "https://shop.weverse.io/en/shop/USD/artists/35/sales/5084",
+        "details": "공식 스토어의 3rd Mini Album My Little Society 상품 정보에 CD로 명시."
+      }
+    },
+    {
+      "id": "9-way-ticket",
+      "title": "9 WAY TICKET",
+      "date": "2021-05-17",
+      "cover": "assets/covers/9-way-ticket.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/203973/20397338.jpg",
+      "category": "single",
+      "categoryLabel": "싱글",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 3,
+      "sources": [
+        "https://music.bugs.co.kr/album/20397338",
+        "https://www.fromis9.jp/discography",
+        "https://kr.ktown4u.com/iteminfo?goods_no=55823"
+      ],
+      "physicalEvidence": {
+        "publisher": "Ktown4u",
+        "url": "https://kr.ktown4u.com/iteminfo?goods_no=55823",
+        "details": "싱글 2집 9 WAY TICKET의 2021-05-17 발매와 포토북·CD-R 구성 확인."
+      }
+    },
+    {
+      "id": "talk-and-talk",
+      "title": "Talk & Talk",
+      "date": "2021-09-01",
+      "cover": "assets/covers/talk-and-talk.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/40644/4064450.jpg",
+      "category": "single",
+      "categoryLabel": "싱글",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 1,
+      "sources": [
+        "https://music.bugs.co.kr/album/4064450",
+        "https://www.fromis9.jp/discography",
+        "https://shop.weverse.io/zh-tw/shop/USD/artists/35/notices/1074"
+      ],
+      "physicalEvidence": {
+        "publisher": "Weverse Shop",
+        "url": "https://shop.weverse.io/zh-tw/shop/USD/artists/35/notices/1074",
+        "details": "공식 스토어 판매 공지에 스페셜 싱글 Talk & Talk의 1 CD 및 포토북 구성이 명시."
+      }
+    },
+    {
+      "id": "midnight-guest",
+      "title": "Midnight Guest",
+      "date": "2022-01-17",
+      "cover": "assets/covers/midnight-guest.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/40702/4070232.jpg",
+      "category": "ep",
+      "categoryLabel": "미니 앨범",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 5,
+      "sources": [
+        "https://music.bugs.co.kr/album/4070232",
+        "https://www.fromis9.jp/discography",
+        "https://fromis9.jp/midnightguest"
+      ],
+      "physicalEvidence": {
+        "publisher": "fromis_9 공식 일본 사이트",
+        "url": "https://fromis9.jp/midnightguest",
+        "details": "정규판과 Jewel Case 판본의 CD-R 실물 구성과 4th Mini Album 수록 내용 확인."
+      }
+    },
+    {
+      "id": "from-our-memento-box",
+      "title": "from our Memento Box",
+      "date": "2022-06-27",
+      "cover": "assets/covers/from-our-memento-box.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/40771/4077170.jpg",
+      "category": "ep",
+      "categoryLabel": "미니 앨범",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 5,
+      "sources": [
+        "https://music.bugs.co.kr/album/4077170",
+        "https://www.fromis9.jp/discography",
+        "https://shop.weverse.io/en/shop/USD/artists/35/sales/8585"
+      ],
+      "physicalEvidence": {
+        "publisher": "Weverse Shop",
+        "url": "https://shop.weverse.io/en/shop/USD/artists/35/sales/8585",
+        "details": "공식 스토어의 5th Mini Album 상품 정보에 2022-06-27 발매와 CD 제공을 명시."
+      }
+    },
+    {
+      "id": "unlock-my-world",
+      "title": "Unlock My World",
+      "date": "2023-06-05",
+      "cover": "assets/covers/unlock-my-world.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/40873/4087396.jpg",
+      "category": "album",
+      "categoryLabel": "정규 앨범",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 10,
+      "sources": [
+        "https://music.bugs.co.kr/album/4087396",
+        "https://www.fromis9.jp/discography",
+        "https://shop.weverse.io/en/shop/USD/artists/2/sales/15237"
+      ],
+      "physicalEvidence": {
+        "publisher": "Weverse Shop",
+        "url": "https://shop.weverse.io/en/shop/USD/artists/2/sales/15237",
+        "details": "공식 스토어의 1st Album 상품 정보에 2023-06-05 발매와 CD 제공을 명시."
+      }
+    },
+    {
+      "id": "supersonic",
+      "title": "Supersonic",
+      "date": "2024-08-12",
+      "cover": "assets/covers/supersonic.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/41053/4105386.jpg",
+      "category": "single",
+      "categoryLabel": "싱글",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 3,
+      "sources": [
+        "https://music.bugs.co.kr/album/4105386",
+        "https://shop.weverse.io/en/shop/KRW/artists/35/sales/27541"
+      ],
+      "physicalEvidence": {
+        "publisher": "Weverse Shop",
+        "url": "https://shop.weverse.io/en/shop/KRW/artists/35/sales/27541",
+        "details": "공식 스토어의 3rd Single Album 상품 정보에 2024-08-12 발매와 CD 제공을 명시."
+      }
+    },
+    {
+      "id": "from-our-20s",
+      "title": "From Our 20's",
+      "date": "2025-06-25",
+      "cover": "assets/covers/from-our-20s.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/207359/20735911.jpg",
+      "category": "ep",
+      "categoryLabel": "미니 앨범",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 6,
+      "sources": [
+        "https://music.bugs.co.kr/album/20735911",
+        "https://www.ktown4u.com/iteminfo?eve_no=43486830&goods_no=140494&grp_no=43486831"
+      ],
+      "physicalEvidence": {
+        "publisher": "Ktown4u",
+        "url": "https://www.ktown4u.com/iteminfo?eve_no=43486830&goods_no=140494&grp_no=43486831",
+        "details": "6th Mini Album Photobook 판본에 2025-06-25 발매, CD-R 및 Dreamus 제조 정보가 명시."
+      }
+    },
+    {
+      "id": "like-you-better-japanese",
+      "title": "LIKE YOU BETTER (Japanese ver.)",
+      "date": "2026-04-01",
+      "cover": "assets/covers/like-you-better-japanese.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/41444/4144419.jpg",
+      "category": "ep",
+      "categoryLabel": "일본 EP",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 1,
+      "sources": [
+        "https://music.bugs.co.kr/album/4144419",
+        "https://www.universal-music.co.jp/fromis9/products/umck-7310/"
+      ],
+      "physicalEvidence": {
+        "publisher": "Universal Music Japan",
+        "url": "https://www.universal-music.co.jp/fromis9/products/umck-7310/",
+        "details": "일본 첫 EP의 CD + Photobook 상품, 2026-04-01 발매, 6트랙과 3번 신곡 Sky Runner를 확인. 일본 판매 집계와 한터 초동은 별도 검증 대상."
+      },
+      "note": "실물 일본 EP를 포함하되 기존 곡의 일본어 버전과 반주곡은 제외하여 새 오리지널곡 Sky Runner 3번만 입력한다. 한터 초동 값은 검증된 별도 차트 데이터에서만 연결한다."
+    },
+    {
+      "id": "glow-me",
+      "title": "Glow ME",
+      "date": "2026-07-21",
+      "cover": "assets/covers/glow-me.jpg",
+      "coverUrl": "https://image.bugsm.co.kr/album/images/500/208273/20827312.jpg",
+      "category": "album",
+      "categoryLabel": "정규 앨범",
+      "physical": true,
+      "physicalFormat": "CD",
+      "courseTrackCount": 10,
+      "sources": [
+        "https://music.bugs.co.kr/album/20827312",
+        "https://www.makestar.com/product/19126"
+      ],
+      "physicalEvidence": {
+        "publisher": "MAKESTAR",
+        "url": "https://www.makestar.com/product/19126",
+        "details": "2nd Album Glow ME Photobook 판본의 정식 판매 공지와 2026-07-21 발매, 실물 음반 배송 및 한터·써클 반영 안내를 확인."
+      }
+    }
+  ],
+  "tracks": [
+    {
+      "id": "to-heart-01",
+      "title": "나에게로 오는 길 (Intro.)",
+      "albumId": "to-heart",
+      "trackNumber": 1,
+      "aliases": [
+        "The Way To Me (Intro.)"
+      ]
+    },
+    {
+      "id": "to-heart-02",
+      "title": "To Heart",
+      "albumId": "to-heart",
+      "trackNumber": 2
+    },
+    {
+      "id": "to-heart-03",
+      "title": "환상속의 그대",
+      "albumId": "to-heart",
+      "trackNumber": 3,
+      "aliases": [
+        "Miracle"
+      ]
+    },
+    {
+      "id": "to-heart-04",
+      "title": "피노키오",
+      "albumId": "to-heart",
+      "trackNumber": 4,
+      "aliases": [
+        "Pinocchio"
+      ]
+    },
+    {
+      "id": "to-heart-05",
+      "title": "Be With You",
+      "albumId": "to-heart",
+      "trackNumber": 5
+    },
+    {
+      "id": "to-heart-06",
+      "title": "유리구두",
+      "albumId": "to-heart",
+      "trackNumber": 6,
+      "aliases": [
+        "유리구두 (MAMA Ver.)",
+        "Glass Shoes (MAMA Ver.)",
+        "Glass Shoes"
+      ],
+      "versionTitle": "유리구두 (MAMA Ver.)",
+      "originalTrackId": "glass-shoes-01",
+      "note": "디지털 선공개는 이 코스에서 제외하므로 선택된 실물 앨범 안의 최초 수록인 To. Heart 6번에서 입력한다. 같은 고유 곡은 한 번만 포함한다.",
+      "sources": [
+        "https://m.yes24.com/goods/detail/58072601",
+        "https://www.fromis9.jp/discography"
+      ]
+    },
+    {
+      "id": "to-day-01",
+      "title": "다가가고 싶어",
+      "albumId": "to-day",
+      "trackNumber": 1,
+      "aliases": [
+        "Close To You"
+      ]
+    },
+    {
+      "id": "to-day-02",
+      "title": "너를 따라, 너에게",
+      "albumId": "to-day",
+      "trackNumber": 2,
+      "aliases": [
+        "Think of You"
+      ]
+    },
+    {
+      "id": "to-day-03",
+      "title": "두근두근(DKDK)",
+      "albumId": "to-day",
+      "trackNumber": 3,
+      "aliases": [
+        "두근두근 (DKDK)",
+        "Pitapat (DKDK)",
+        "DKDK"
+      ]
+    },
+    {
+      "id": "to-day-04",
+      "title": "22세기 소녀",
+      "albumId": "to-day",
+      "trackNumber": 4,
+      "aliases": [
+        "22Century Girls",
+        "22Century Girl"
+      ]
+    },
+    {
+      "id": "to-day-05",
+      "title": "CLOVER",
+      "albumId": "to-day",
+      "trackNumber": 5
+    },
+    {
+      "id": "to-day-06",
+      "title": "FIRST LOVE",
+      "albumId": "to-day",
+      "trackNumber": 6
+    },
+    {
+      "id": "from-9-01",
+      "title": "LOVE BOMB",
+      "albumId": "from-9",
+      "trackNumber": 1
+    },
+    {
+      "id": "from-9-02",
+      "title": "DANCING QUEEN",
+      "albumId": "from-9",
+      "trackNumber": 2
+    },
+    {
+      "id": "from-9-03",
+      "title": "물들어",
+      "albumId": "from-9",
+      "trackNumber": 3,
+      "aliases": [
+        "Coloring"
+      ]
+    },
+    {
+      "id": "fun-factory-01",
+      "title": "FUN!",
+      "albumId": "fun-factory",
+      "trackNumber": 1
+    },
+    {
+      "id": "fun-factory-02",
+      "title": "LOVE RUMPUMPUM",
+      "albumId": "fun-factory",
+      "trackNumber": 2
+    },
+    {
+      "id": "fun-factory-03",
+      "title": "FLY HIGH",
+      "albumId": "fun-factory",
+      "trackNumber": 3
+    },
+    {
+      "id": "my-little-society-01",
+      "title": "Feel Good (SECRET CODE)",
+      "albumId": "my-little-society",
+      "trackNumber": 1
+    },
+    {
+      "id": "my-little-society-02",
+      "title": "Weather",
+      "albumId": "my-little-society",
+      "trackNumber": 2
+    },
+    {
+      "id": "my-little-society-03",
+      "title": "별의 밤",
+      "albumId": "my-little-society",
+      "trackNumber": 3,
+      "aliases": [
+        "Starry Night",
+        "Starry night"
+      ]
+    },
+    {
+      "id": "my-little-society-04",
+      "title": "Somebody to love",
+      "albumId": "my-little-society",
+      "trackNumber": 4
+    },
+    {
+      "id": "my-little-society-05",
+      "title": "물고기",
+      "albumId": "my-little-society",
+      "trackNumber": 5,
+      "aliases": [
+        "Mulgogi"
+      ]
+    },
+    {
+      "id": "9-way-ticket-01",
+      "title": "Airplane Mode",
+      "albumId": "9-way-ticket",
+      "trackNumber": 1
+    },
+    {
+      "id": "9-way-ticket-02",
+      "title": "WE GO",
+      "albumId": "9-way-ticket",
+      "trackNumber": 2
+    },
+    {
+      "id": "9-way-ticket-03",
+      "title": "Promise",
+      "albumId": "9-way-ticket",
+      "trackNumber": 3
+    },
+    {
+      "id": "talk-and-talk-01",
+      "title": "Talk & Talk",
+      "albumId": "talk-and-talk",
+      "trackNumber": 1
+    },
+    {
+      "id": "midnight-guest-01",
+      "title": "Escape Room",
+      "albumId": "midnight-guest",
+      "trackNumber": 1
+    },
+    {
+      "id": "midnight-guest-02",
+      "title": "DM",
+      "albumId": "midnight-guest",
+      "trackNumber": 2
+    },
+    {
+      "id": "midnight-guest-03",
+      "title": "Love is Around",
+      "albumId": "midnight-guest",
+      "trackNumber": 3
+    },
+    {
+      "id": "midnight-guest-04",
+      "title": "Hush Hush",
+      "albumId": "midnight-guest",
+      "trackNumber": 4
+    },
+    {
+      "id": "midnight-guest-05",
+      "title": "0g",
+      "albumId": "midnight-guest",
+      "trackNumber": 5
+    },
+    {
+      "id": "from-our-memento-box-01",
+      "title": "Up And",
+      "albumId": "from-our-memento-box",
+      "trackNumber": 1
+    },
+    {
+      "id": "from-our-memento-box-02",
+      "title": "Stay This Way",
+      "albumId": "from-our-memento-box",
+      "trackNumber": 2
+    },
+    {
+      "id": "from-our-memento-box-03",
+      "title": "Blind Letter",
+      "albumId": "from-our-memento-box",
+      "trackNumber": 3
+    },
+    {
+      "id": "from-our-memento-box-04",
+      "title": "Cheese",
+      "albumId": "from-our-memento-box",
+      "trackNumber": 4
+    },
+    {
+      "id": "from-our-memento-box-05",
+      "title": "Rewind",
+      "albumId": "from-our-memento-box",
+      "trackNumber": 5
+    },
+    {
+      "id": "unlock-my-world-01",
+      "title": "Attitude",
+      "albumId": "unlock-my-world",
+      "trackNumber": 1
+    },
+    {
+      "id": "unlock-my-world-02",
+      "title": "#menow",
+      "albumId": "unlock-my-world",
+      "trackNumber": 2
+    },
+    {
+      "id": "unlock-my-world-03",
+      "title": "Wishlist",
+      "albumId": "unlock-my-world",
+      "trackNumber": 3
+    },
+    {
+      "id": "unlock-my-world-04",
+      "title": "In the Mirror",
+      "albumId": "unlock-my-world",
+      "trackNumber": 4
+    },
+    {
+      "id": "unlock-my-world-05",
+      "title": "Don't Care",
+      "albumId": "unlock-my-world",
+      "trackNumber": 5
+    },
+    {
+      "id": "unlock-my-world-06",
+      "title": "Prom Night",
+      "albumId": "unlock-my-world",
+      "trackNumber": 6
+    },
+    {
+      "id": "unlock-my-world-07",
+      "title": "Bring It On",
+      "albumId": "unlock-my-world",
+      "trackNumber": 7
+    },
+    {
+      "id": "unlock-my-world-08",
+      "title": "What I Want",
+      "albumId": "unlock-my-world",
+      "trackNumber": 8
+    },
+    {
+      "id": "unlock-my-world-09",
+      "title": "My Night Routine",
+      "albumId": "unlock-my-world",
+      "trackNumber": 9
+    },
+    {
+      "id": "unlock-my-world-10",
+      "title": "눈맞춤",
+      "albumId": "unlock-my-world",
+      "trackNumber": 10,
+      "aliases": [
+        "Eye Contact",
+        "눈맞춤 (Eye Contact)"
+      ]
+    },
+    {
+      "id": "supersonic-01",
+      "title": "Supersonic",
+      "albumId": "supersonic",
+      "trackNumber": 1
+    },
+    {
+      "id": "supersonic-02",
+      "title": "Beat the Heat",
+      "albumId": "supersonic",
+      "trackNumber": 2
+    },
+    {
+      "id": "supersonic-03",
+      "title": "Take A Chance",
+      "albumId": "supersonic",
+      "trackNumber": 3
+    },
+    {
+      "id": "from-our-20s-01",
+      "title": "LIKE YOU BETTER",
+      "albumId": "from-our-20s",
+      "trackNumber": 1
+    },
+    {
+      "id": "from-our-20s-02",
+      "title": "REBELUTIONAL",
+      "albumId": "from-our-20s",
+      "trackNumber": 2
+    },
+    {
+      "id": "from-our-20s-03",
+      "title": "Love=Disaster",
+      "albumId": "from-our-20s",
+      "trackNumber": 3
+    },
+    {
+      "id": "from-our-20s-04",
+      "title": "Strawberry Mimosa",
+      "albumId": "from-our-20s",
+      "trackNumber": 4
+    },
+    {
+      "id": "from-our-20s-05",
+      "title": "Twisted love",
+      "albumId": "from-our-20s",
+      "trackNumber": 5,
+      "aliases": [
+        "Twisted Love"
+      ]
+    },
+    {
+      "id": "from-our-20s-06",
+      "title": "Merry Go Round",
+      "albumId": "from-our-20s",
+      "trackNumber": 6
+    },
+    {
+      "id": "like-you-better-japanese-03",
+      "title": "Sky Runner",
+      "albumId": "like-you-better-japanese",
+      "trackNumber": 3
+    },
+    {
+      "id": "glow-me-01",
+      "title": "ETERNAL",
+      "albumId": "glow-me",
+      "trackNumber": 1
+    },
+    {
+      "id": "glow-me-02",
+      "title": "Vitamin ME",
+      "albumId": "glow-me",
+      "trackNumber": 2
+    },
+    {
+      "id": "glow-me-03",
+      "title": "Pocket Treat",
+      "albumId": "glow-me",
+      "trackNumber": 3
+    },
+    {
+      "id": "glow-me-04",
+      "title": "Blue Heart",
+      "albumId": "glow-me",
+      "trackNumber": 4
+    },
+    {
+      "id": "glow-me-05",
+      "title": "Screen Time",
+      "albumId": "glow-me",
+      "trackNumber": 5
+    },
+    {
+      "id": "glow-me-06",
+      "title": "Teacher",
+      "albumId": "glow-me",
+      "trackNumber": 6
+    },
+    {
+      "id": "glow-me-07",
+      "title": "Cold Blood",
+      "albumId": "glow-me",
+      "trackNumber": 7
+    },
+    {
+      "id": "glow-me-08",
+      "title": "Why do I cry?",
+      "albumId": "glow-me",
+      "trackNumber": 8,
+      "aliases": [
+        "Why Do I Cry?"
+      ]
+    },
+    {
+      "id": "glow-me-09",
+      "title": "Day 1",
+      "albumId": "glow-me",
+      "trackNumber": 9,
+      "aliases": [
+        "DAY 1"
+      ]
+    },
+    {
+      "id": "glow-me-10",
+      "title": "Wonderland",
+      "albumId": "glow-me",
+      "trackNumber": 10
+    }
+  ],
+  "excluded": [
+    {
+      "id": "glass-shoes",
+      "title": "유리구두",
+      "kind": "release",
+      "reason": "2017년 디지털 선공개 싱글은 제외한다. 같은 곡 유리구두는 To. Heart 실물판 6번에서 코스 내 한 번 포함한다.",
+      "sources": [
+        "https://music.bugs.co.kr/album/689232",
+        "https://www.fromis9.jp/discography"
+      ]
+    },
+    {
+      "id": "immortal-songs-2019",
+      "title": "불후의 명곡 - 전설을 노래하다 (인생의 희노애락을 노래하다 작사가 김병걸)",
+      "kind": "release",
+      "reason": "방송 경연 컴필레이션 발매는 이번 실물 앨범 코스 범위에서 제외한다.",
+      "sources": [
+        "https://music.bugs.co.kr/album/20240150",
+        "https://www.genie.co.kr/detail/albumInfo?axnm=81176379"
+      ]
+    },
+    {
+      "id": "cyworld-bgm-2021",
+      "title": "싸이월드 BGM 2021",
+      "kind": "release",
+      "reason": "외부 프로젝트 발매는 이번 실물 앨범 코스 범위에서 제외한다.",
+      "sources": [
+        "https://music.bugs.co.kr/album/20419820"
+      ]
+    },
+    {
+      "id": "immortal-songs-2021",
+      "title": "불후의 명곡 - 아티스트 백두산 유현상 편",
+      "kind": "release",
+      "reason": "방송 경연 컴필레이션 발매는 이번 실물 앨범 코스 범위에서 제외한다.",
+      "sources": [
+        "https://music.bugs.co.kr/album/4067793"
+      ]
+    },
+    {
+      "id": "crazy-love-ost-part-2",
+      "title": "크레이지 러브 OST Part.2",
+      "kind": "release",
+      "reason": "OST 발매는 이번 실물 앨범 코스 범위에서 제외한다.",
+      "sources": [
+        "https://music.bugs.co.kr/album/20455872"
+      ]
+    },
+    {
+      "id": "sea-of-moonlight",
+      "title": "달빛바다",
+      "kind": "release",
+      "reason": "외부 프로젝트 발매는 이번 실물 앨범 코스 범위에서 제외한다.",
+      "sources": [
+        "https://music.bugs.co.kr/album/4078026"
+      ]
+    },
+    {
+      "id": "love-me-back",
+      "title": "Love Me Back (작전명 순정 X 프로미스나인)",
+      "kind": "release",
+      "reason": "OST 발매는 이번 실물 앨범 코스 범위에서 제외한다.",
+      "sources": [
+        "https://music.bugs.co.kr/album/4091871"
+      ]
+    },
+    {
+      "id": "from",
+      "title": "from",
+      "kind": "release",
+      "reason": "디지털 싱글은 이번 실물 앨범 코스 범위에서 제외한다.",
+      "sources": [
+        "https://music.bugs.co.kr/album/4112113"
+      ]
+    },
+    {
+      "id": "the-winning-try-ost-part-2",
+      "title": "트라이 OST Part.2",
+      "kind": "release",
+      "reason": "OST 발매는 이번 실물 앨범 코스 범위에서 제외한다.",
+      "sources": [
+        "https://music.bugs.co.kr/album/4124391"
+      ]
+    },
+    {
+      "id": "white-memories",
+      "title": "하얀 그리움",
+      "kind": "release",
+      "reason": "공식 표기가 Special Digital Single인 발매이므로 제외한다. Holiday Edition KIT 같은 관련 MD 상품을 정식 CD 앨범과 동일시하지 않는다.",
+      "sources": [
+        "https://music.bugs.co.kr/album/20774246"
+      ]
+    },
+    {
+      "id": "boyfriend-on-demand-part-2",
+      "title": "월간남친 Part 2 (Soundtrack from the Netflix Series)",
+      "kind": "release",
+      "reason": "OST 발매는 이번 실물 앨범 코스 범위에서 제외한다.",
+      "sources": [
+        "https://music.bugs.co.kr/album/4143170"
+      ]
+    },
+    {
+      "id": "from-9-04",
+      "title": "두근두근 (DKDK) (From.9 Ver.) (CD Only)",
+      "kind": "track-version",
+      "reason": "To. Day 3번에서 이미 입력한 고유 곡의 재녹음이므로 중복 제외.",
+      "sources": [
+        "https://www.fromis9.jp/discography"
+      ]
+    },
+    {
+      "id": "from-9-05",
+      "title": "22세기 소녀 (From.9 Ver.) (CD Only)",
+      "kind": "track-version",
+      "reason": "To. Day 4번에서 이미 입력한 고유 곡의 재녹음이므로 중복 제외.",
+      "sources": [
+        "https://www.fromis9.jp/discography"
+      ]
+    },
+    {
+      "id": "like-you-better-japanese-01",
+      "title": "LIKE YOU BETTER (Japanese ver.)",
+      "kind": "track-version",
+      "reason": "From Our 20s에서 이미 입력한 고유 곡의 일본어 버전이므로 제외.",
+      "sources": [
+        "https://www.universal-music.co.jp/fromis9/products/umck-7310/"
+      ]
+    },
+    {
+      "id": "like-you-better-japanese-02",
+      "title": "Love=Disaster (Japanese ver.)",
+      "kind": "track-version",
+      "reason": "From Our 20s에서 이미 입력한 고유 곡의 일본어 버전이므로 제외.",
+      "sources": [
+        "https://www.universal-music.co.jp/fromis9/products/umck-7310/"
+      ]
+    },
+    {
+      "id": "like-you-better-japanese-04",
+      "title": "LIKE YOU BETTER (Japanese ver.) -instrumental-",
+      "kind": "track-version",
+      "reason": "반주 트랙은 제외.",
+      "sources": [
+        "https://www.universal-music.co.jp/fromis9/products/umck-7310/"
+      ]
+    },
+    {
+      "id": "like-you-better-japanese-05",
+      "title": "Love=Disaster (Japanese ver.) -instrumental-",
+      "kind": "track-version",
+      "reason": "반주 트랙은 제외.",
+      "sources": [
+        "https://www.universal-music.co.jp/fromis9/products/umck-7310/"
+      ]
+    },
+    {
+      "id": "like-you-better-japanese-06",
+      "title": "Sky Runner -instrumental-",
+      "kind": "track-version",
+      "reason": "반주 트랙은 제외.",
+      "sources": [
+        "https://www.universal-music.co.jp/fromis9/products/umck-7310/"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "title": "Midnight Guest 발매·트랙·실물 포함 근거",
+      "url": "https://fromis9.jp/midnightguest"
+    },
+    {
+      "title": "From.9 발매·트랙·실물 포함 근거",
+      "url": "https://global.yes24.com/Goods/64744913"
+    },
+    {
+      "title": "9 WAY TICKET 발매·트랙·실물 포함 근거",
+      "url": "https://kr.ktown4u.com/iteminfo?goods_no=55823"
+    },
+    {
+      "title": "To. Heart 발매·트랙·실물 포함 근거",
+      "url": "https://m.yes24.com/goods/detail/58072601"
+    },
+    {
+      "title": "To. Day 발매·트랙·실물 포함 근거",
+      "url": "https://m.yes24.com/Goods/Detail/61248947"
+    },
+    {
+      "title": "To. Heart 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/20143775"
+    },
+    {
+      "title": "To. Day 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/20171348"
+    },
+    {
+      "title": "From.9 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/20198815"
+    },
+    {
+      "title": "FUN FACTORY 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/20258300"
+    },
+    {
+      "title": "My Little Society 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/20349698"
+    },
+    {
+      "title": "9 WAY TICKET 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/20397338"
+    },
+    {
+      "title": "From Our 20's 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/20735911"
+    },
+    {
+      "title": "Glow ME 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/20827312"
+    },
+    {
+      "title": "Talk & Talk 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/4064450"
+    },
+    {
+      "title": "Midnight Guest 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/4070232"
+    },
+    {
+      "title": "from our Memento Box 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/4077170"
+    },
+    {
+      "title": "Unlock My World 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/4087396"
+    },
+    {
+      "title": "Supersonic 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/4105386"
+    },
+    {
+      "title": "LIKE YOU BETTER (Japanese ver.) 발매·트랙·실물 포함 근거",
+      "url": "https://music.bugs.co.kr/album/4144419"
+    },
+    {
+      "title": "Supersonic 발매·트랙·실물 포함 근거",
+      "url": "https://shop.weverse.io/en/shop/KRW/artists/35/sales/27541"
+    },
+    {
+      "title": "Unlock My World 발매·트랙·실물 포함 근거",
+      "url": "https://shop.weverse.io/en/shop/USD/artists/2/sales/15237"
+    },
+    {
+      "title": "My Little Society 발매·트랙·실물 포함 근거",
+      "url": "https://shop.weverse.io/en/shop/USD/artists/35/sales/5084"
+    },
+    {
+      "title": "from our Memento Box 발매·트랙·실물 포함 근거",
+      "url": "https://shop.weverse.io/en/shop/USD/artists/35/sales/8585"
+    },
+    {
+      "title": "Talk & Talk 발매·트랙·실물 포함 근거",
+      "url": "https://shop.weverse.io/zh-tw/shop/USD/artists/35/notices/1074"
+    },
+    {
+      "title": "To. Heart 발매·트랙·실물 포함 근거",
+      "url": "https://www.fromis9.jp/discography"
+    },
+    {
+      "title": "From Our 20's 발매·트랙·실물 포함 근거",
+      "url": "https://www.ktown4u.com/iteminfo?eve_no=43486830&goods_no=140494&grp_no=43486831"
+    },
+    {
+      "title": "FUN FACTORY 발매·트랙·실물 포함 근거",
+      "url": "https://www.ktown4u.com/iteminfo?goods_no=38300"
+    },
+    {
+      "title": "Glow ME 발매·트랙·실물 포함 근거",
+      "url": "https://www.makestar.com/product/19126"
+    },
+    {
+      "title": "LIKE YOU BETTER (Japanese ver.) 발매·트랙·실물 포함 근거",
+      "url": "https://www.universal-music.co.jp/fromis9/products/umck-7310/"
+    },
+    {
+      "title": "하얀 그리움 공식 MV의 Special Digital Single 표기",
+      "url": "https://www.youtube.com/watch?v=5ZB9JLfIw_Q"
+    }
+  ]
+}

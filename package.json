@@ -6,6 +6,6 @@
   "scripts": {
     "dev": "node dev.mjs",
     "test": "node --test --test-isolation=none tests/*.test.mjs",
-    "check": "node scripts/check-data.mjs"
+    "check": "node scripts/check-chart-data.mjs"
   }
 }

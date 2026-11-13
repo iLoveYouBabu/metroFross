@@ -145,7 +145,10 @@
         "https://music.bugs.co.kr/album/689232",
         "https://www.fromis9.jp/discography"
       ],
-      "cover": "assets/covers/glass-shoes.jpg"
+      "cover": "assets/covers/glass-shoes.jpg",
+      "category": "single",
+      "categoryLabel": "싱글",
+      "note": "프리데뷔 싱글. 유리구두는 이 최초 발매에서 한 번만 수록한다."
     },
     {
       "id": "to-heart",
@@ -156,7 +159,10 @@
         "https://music.bugs.co.kr/album/20143775",
         "https://www.fromis9.jp/discography"
       ],
-      "cover": "assets/covers/to-heart.jpg"
+      "cover": "assets/covers/to-heart.jpg",
+      "category": "ep",
+      "categoryLabel": "미니 앨범",
+      "note": "6번 유리구두 (MAMA Ver.)는 최초 싱글과 같은 곡의 버전이므로 중복 수록하지 않는다."
     },
     {
       "id": "to-day",
@@ -167,7 +173,9 @@
         "https://music.bugs.co.kr/album/20171348",
         "https://www.fromis9.jp/discography"
       ],
-      "cover": "assets/covers/to-day.jpg"
+      "cover": "assets/covers/to-day.jpg",
+      "category": "ep",
+      "categoryLabel": "미니 앨범"
     },
     {
       "id": "from-9",
@@ -178,7 +186,10 @@
         "https://music.bugs.co.kr/album/20198815",
         "https://www.fromis9.jp/discography"
       ],
-      "cover": "assets/covers/from-9.jpg"
+      "cover": "assets/covers/from-9.jpg",
+      "category": "single",
+      "categoryLabel": "싱글",
+      "note": "CD 전용 4·5번 두근두근(DKDK)와 22세기 소녀의 From.9 버전은 최초 발매와 중복이므로 제외한다."
     },
     {
       "id": "immortal-songs-2019",
@@ -189,7 +200,10 @@
         "https://music.bugs.co.kr/album/20240150",
         "https://www.genie.co.kr/detail/albumInfo?axnm=81176379"
       ],
-      "cover": "assets/covers/immortal-songs-2019.jpg"
+      "cover": "assets/covers/immortal-songs-2019.jpg",
+      "category": "performance",
+      "categoryLabel": "방송 경연",
+      "note": "KBS 불후의 명곡 경연 발매 음원. 설운도의 원곡을 다시 부른 다함께 차차차가 2번 트랙이며, 곡의 공식 아티스트는 프로미스나인이다."
     },
     {
       "id": "fun-factory",
@@ -200,7 +214,9 @@
         "https://music.bugs.co.kr/album/20258300",
         "https://www.fromis9.jp/discography"
       ],
-      "cover": "assets/covers/fun-factory.jpg"
+      "cover": "assets/covers/fun-factory.jpg",
+      "category": "single",
+      "categoryLabel": "싱글"
     },
     {
       "id": "my-little-society",
@@ -211,7 +227,9 @@
         "https://music.bugs.co.kr/album/20349698",
         "https://www.fromis9.jp/discography"
       ],
-      "cover": "assets/covers/my-little-society.jpg"
+      "cover": "assets/covers/my-little-society.jpg",
+      "category": "ep",
+      "categoryLabel": "미니 앨범"
     },
     {
       "id": "9-way-ticket",
@@ -222,7 +240,9 @@
         "https://music.bugs.co.kr/album/20397338",
         "https://www.fromis9.jp/discography"
       ],
-      "cover": "assets/covers/9-way-ticket.jpg"
+      "cover": "assets/covers/9-way-ticket.jpg",
+      "category": "single",
+      "categoryLabel": "싱글"
     },
     {
       "id": "talk-and-talk",
@@ -233,7 +253,9 @@
         "https://music.bugs.co.kr/album/4064450",
         "https://www.fromis9.jp/discography"
       ],
-      "cover": "assets/covers/talk-and-talk.jpg"
+      "cover": "assets/covers/talk-and-talk.jpg",
+      "category": "single",
+      "categoryLabel": "싱글"
     },
     {
       "id": "cyworld-bgm-2021",
@@ -243,7 +265,10 @@
       "sources": [
         "https://music.bugs.co.kr/album/20419820"
       ],
-      "cover": "assets/covers/cyworld-bgm-2021.jpg"
+      "cover": "assets/covers/cyworld-bgm-2021.jpg",
+      "category": "project",
+      "categoryLabel": "프로젝트",
+      "note": "싸이월드 BGM 2021 프로젝트의 유미 원곡 리메이크. 공식 발매 아티스트는 프로미스나인이며, 실제 가창은 하영·지원·서연이다."
     },
     {
       "id": "immortal-songs-2021",
@@ -253,7 +278,10 @@
       "sources": [
         "https://music.bugs.co.kr/album/4067793"
       ],
-      "cover": "assets/covers/immortal-songs-2021.jpg"
+      "cover": "assets/covers/immortal-songs-2021.jpg",
+      "category": "performance",
+      "categoryLabel": "방송 경연",
+      "note": "KBS 불후의 명곡 경연 발매 음원. 난 사랑을 아직 몰라는 1번 트랙이며, 곡의 공식 아티스트는 프로미스나인이다."
     },
     {
       "id": "midnight-guest",
@@ -264,7 +292,9 @@
         "https://music.bugs.co.kr/album/4070232",
         "https://www.fromis9.jp/discography"
       ],
-      "cover": "assets/covers/midnight-guest.jpg"
+      "cover": "assets/covers/midnight-guest.jpg",
+      "category": "ep",
+      "categoryLabel": "미니 앨범"
     },
     {
       "id": "crazy-love-ost-part-2",
@@ -274,7 +304,10 @@
       "sources": [
         "https://music.bugs.co.kr/album/20455872"
       ],
-      "cover": "assets/covers/crazy-love-ost-part-2.jpg"
+      "cover": "assets/covers/crazy-love-ost-part-2.jpg",
+      "category": "ost",
+      "categoryLabel": "OST",
+      "note": "드라마 크레이지 러브 OST. Stay Alive의 최초 Part 발매만 수록하고 반주곡과 종합 OST 재수록은 제외한다."
     },
     {
       "id": "from-our-memento-box",
@@ -285,7 +318,9 @@
         "https://music.bugs.co.kr/album/4077170",
         "https://www.fromis9.jp/discography"
       ],
-      "cover": "assets/covers/from-our-memento-box.jpg"
+      "cover": "assets/covers/from-our-memento-box.jpg",
+      "category": "ep",
+      "categoryLabel": "미니 앨범"
     },
     {
       "id": "sea-of-moonlight",
@@ -295,7 +330,10 @@
       "sources": [
         "https://music.bugs.co.kr/album/4078026"
       ],
-      "cover": "assets/covers/sea-of-moonlight.jpg"
+      "cover": "assets/covers/sea-of-moonlight.jpg",
+      "category": "project",
+      "categoryLabel": "프로젝트",
+      "note": "리본 여름 프로젝트의 정식 리메이크 싱글. 아이유·피에스타의 2012년 원곡 달빛바다를 프로미스나인 명의로 다시 발매했다."
     },
     {
       "id": "unlock-my-world",
@@ -306,7 +344,9 @@
         "https://music.bugs.co.kr/album/4087396",
         "https://www.fromis9.jp/discography"
       ],
-      "cover": "assets/covers/unlock-my-world.jpg"
+      "cover": "assets/covers/unlock-my-world.jpg",
+      "category": "album",
+      "categoryLabel": "정규 앨범"
     },
     {
       "id": "love-me-back",
@@ -316,7 +356,10 @@
       "sources": [
         "https://music.bugs.co.kr/album/4091871"
       ],
-      "cover": "assets/covers/love-me-back.jpg"
+      "cover": "assets/covers/love-me-back.jpg",
+      "category": "ost",
+      "categoryLabel": "OST",
+      "note": "작전명 순정 X 프로미스나인 컬래버 발매. Love Me Back만 수록하고 반주곡은 제외한다."
     },
     {
       "id": "supersonic",
@@ -326,7 +369,9 @@
       "sources": [
         "https://music.bugs.co.kr/album/4105386"
       ],
-      "cover": "assets/covers/supersonic.jpg"
+      "cover": "assets/covers/supersonic.jpg",
+      "category": "single",
+      "categoryLabel": "싱글"
     },
     {
       "id": "from",
@@ -336,7 +381,9 @@
       "sources": [
         "https://music.bugs.co.kr/album/4112113"
       ],
-      "cover": "assets/covers/from.jpg"
+      "cover": "assets/covers/from.jpg",
+      "category": "single",
+      "categoryLabel": "싱글"
     },
     {
       "id": "from-our-20s",
@@ -346,7 +393,9 @@
       "sources": [
         "https://music.bugs.co.kr/album/20735911"
       ],
-      "cover": "assets/covers/from-our-20s.jpg"
+      "cover": "assets/covers/from-our-20s.jpg",
+      "category": "ep",
+      "categoryLabel": "미니 앨범"
     },
     {
       "id": "the-winning-try-ost-part-2",
@@ -356,7 +405,10 @@
       "sources": [
         "https://music.bugs.co.kr/album/4124391"
       ],
-      "cover": "assets/covers/the-winning-try-ost-part-2.jpg"
+      "cover": "assets/covers/the-winning-try-ost-part-2.jpg",
+      "category": "ost",
+      "categoryLabel": "OST",
+      "note": "드라마 트라이 OST Part.2. Touchdown의 최초 Part 발매만 수록하고 반주곡과 종합 OST 재수록은 제외한다."
     },
     {
       "id": "white-memories",
@@ -366,7 +418,10 @@
       "sources": [
         "https://music.bugs.co.kr/album/20774246"
       ],
-      "cover": "assets/covers/white-memories.jpg"
+      "cover": "assets/covers/white-memories.jpg",
+      "category": "single",
+      "categoryLabel": "싱글",
+      "note": "김민종 원곡을 리메이크한 프로미스나인의 정식 디지털 싱글이다."
     },
     {
       "id": "boyfriend-on-demand-part-2",
@@ -376,7 +431,10 @@
       "sources": [
         "https://music.bugs.co.kr/album/4143170"
       ],
-      "cover": "assets/covers/boyfriend-on-demand-part-2.jpg"
+      "cover": "assets/covers/boyfriend-on-demand-part-2.jpg",
+      "category": "ost",
+      "categoryLabel": "OST",
+      "note": "총 18트랙 중 프로미스나인 명의의 Swipe It Out 1번만 수록한다. 다른 아티스트의 곡과 드라마 BGM은 제외한다."
     },
     {
       "id": "like-you-better-japanese",
@@ -387,7 +445,10 @@
         "https://music.bugs.co.kr/album/4144419",
         "https://www.universal-music.co.jp/fromis9/products/umck-7310/"
       ],
-      "cover": "assets/covers/like-you-better-japanese.jpg"
+      "cover": "assets/covers/like-you-better-japanese.jpg",
+      "category": "ep",
+      "categoryLabel": "일본 EP",
+      "note": "일본 첫 EP의 새 오리지널곡 Sky Runner 3번만 수록한다. 기존 곡의 일본어 버전과 반주곡은 중복·버전으로 제외한다."
     },
     {
       "id": "glow-me",
@@ -397,7 +458,9 @@
       "sources": [
         "https://music.bugs.co.kr/album/20827312"
       ],
-      "cover": "assets/covers/glow-me.jpg"
+      "cover": "assets/covers/glow-me.jpg",
+      "category": "album",
+      "categoryLabel": "정규 앨범"
     }
   ],
   "tracks": [
@@ -527,9 +590,7 @@
       "title": "다함께 차차차",
       "albumId": "immortal-songs-2019",
       "trackNumber": 2,
-      "aliases": [
-        "All Together Cha Cha Cha"
-      ]
+      "aliases": []
     },
     {
       "id": "fun-factory-01",

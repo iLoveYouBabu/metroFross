@@ -7,6 +7,14 @@ import { TypingSession, normalizeTitle, countStrokes } from '../dist/core.mjs';
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const distRoot = resolve(projectRoot, 'dist');
 const catalogPath = resolve(distRoot, 'data', 'discography.json');
+const CATEGORY_DEFINITIONS = {
+  album: { labels: ['정규 앨범'], mainCourse: true },
+  ep: { labels: ['미니 앨범', '일본 EP'], mainCourse: true },
+  single: { labels: ['싱글'], mainCourse: true },
+  ost: { labels: ['OST'], mainCourse: false },
+  project: { labels: ['프로젝트'], mainCourse: false },
+  performance: { labels: ['방송 경연'], mainCourse: false }
+};
 
 function nonEmpty(value, label) {
   assert.equal(typeof value, 'string', `${label}: 문자열이어야 합니다.`);
@@ -139,6 +147,11 @@ async function main() {
     nonEmpty(album.id, `앨범 ${index + 1} ID`);
     nonEmpty(album.title, `${album.id} 앨범명`);
     assert.ok(!albums.has(album.id), `앨범 ID 중복: ${album.id}`);
+    nonEmpty(album.category, `${album.id} 발매 분류`);
+    const category = Object.hasOwn(CATEGORY_DEFINITIONS, album.category) ? CATEGORY_DEFINITIONS[album.category] : null;
+    assert.ok(category, `${album.id}: 허용되지 않은 발매 분류 ${album.category}`);
+    nonEmpty(album.categoryLabel, `${album.id} 분류 표시명`);
+    assert.ok(category.labels.includes(album.categoryLabel), `${album.id}: ${album.category}에 맞지 않는 분류 표시명 ${album.categoryLabel}`);
     calendarDate(album.date, `${album.id} 발매일`);
     assert.ok(album.date >= previousDate, `${album.id}: 앨범 발매일이 오름차순이 아닙니다.`);
     assert.ok(album.date <= updatedAt, `${album.id}: 확인일 뒤의 발매일입니다.`);
@@ -180,8 +193,12 @@ async function main() {
   for (const album of albums.values()) assert.ok(album.count > 0, `${album.id}: 연결된 곡이 없습니다.`);
   await Promise.all(catalog.albums.map(checkCover));
   const roundtrip = checkCourseRoundtrip(catalog.tracks);
+  const mainTracks = catalog.tracks.filter(track => CATEGORY_DEFINITIONS[albums.get(track.albumId).category].mainCourse);
+  assert.ok(mainTracks.length > 0, '앨범·EP·싱글 본편 코스가 비어 있습니다.');
+  const mainRoundtrip = checkCourseRoundtrip(mainTracks);
   console.log(`카탈로그 검사 통과: ${catalog.tracks.length}곡 · ${catalog.albums.length}개 앨범/싱글 · 로컬 재킷 ${catalog.albums.length}장`);
   console.log(`전체 원제 완주 통과: ${roundtrip.expectedStrokes}타 · IME ${roundtrip.imeTrackCount}곡 · 별칭 ${roundtrip.aliasCount}개 · 일시정지/완주 시간 고정`);
+  console.log(`본편 코스 완주 통과: ${mainTracks.length}곡 · ${mainRoundtrip.expectedStrokes}타 · IME ${mainRoundtrip.imeTrackCount}곡 · 별칭 ${mainRoundtrip.aliasCount}개`);
 }
 
 try { await main(); }
