@@ -75,7 +75,7 @@ export class SalesChartView {
     this._lastSnapshot = {
       currentAlbum: albums[0], album: { index: 0, ratio: 0 },
       course: { completed: 0, total: 0, ratio: 0 },
-      position: { plotIndex: 0, yValue: knownSales(albums[0]) ? albums[0].firstWeekSales : null, kind: 'anchor' }
+      position: { plotIndex: 0, yValue: 0, kind: 'origin' }
     };
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-labelledby', `${this._id}-title ${this._id}-description`);
@@ -154,7 +154,7 @@ export class SalesChartView {
     root.append(svgNode('desc', { id: `${this._id}-description` },
       `${this.overview ? '전체 앨범 보기. 세로축은 0을 기준으로 합니다' : '현재 앨범 주변 보기. 세로축을 주변 판매량 범위로 확대하며 앨범이 바뀔 때만 범위를 조정합니다'}. ` +
       `가로축은 발매 순서, 세로축은 ${minimum.toLocaleString('ko-KR')}장부터 ${maximum.toLocaleString('ko-KR')}장까지 선형 눈금입니다. ` +
-      '원은 앨범별 첫 주 판매량이며 약으로 표시한 값은 근삿값입니다. 오리콘 첫 주와 팬 정리 자료는 각 점의 설명에서 구분합니다. 움직이는 재킷은 타이핑 진행 위치이며 그 높이는 별도 판매량 측정치가 아닙니다. 미확인 구간의 선은 끊고 마지막 점선은 판매량 변화 없는 가상 완주 구간입니다.'));
+      '원은 앨범별 첫 주 판매량이며 약으로 표시한 값은 근삿값입니다. 오리콘 첫 주와 팬 정리 자료는 각 점의 설명에서 구분합니다. 0의 시작점은 가상 출발점이며 판매량 관측값이 아닙니다. 각 앨범의 모든 곡을 입력하면 해당 앨범 점에 도착합니다. 움직이는 재킷은 타이핑 진행 위치이며 그 높이는 별도 판매량 측정치가 아닙니다. 미확인 구간의 선은 끊습니다.'));
 
     const ticks = height < 110 ? [minimum, maximum] : layout.ticks;
     for (const value of ticks) {
@@ -168,22 +168,28 @@ export class SalesChartView {
       const left = this.albums[index];
       const right = this.albums[index + 1];
       if (!knownSales(left) || !knownSales(right)) continue;
-      const segment = clippedLine(x(index), y(left.firstWeekSales), x(index + 1), y(right.firstWeekSales), box);
+      const segment = clippedLine(x(index + 1), y(left.firstWeekSales), x(index + 2), y(right.firstWeekSales), box);
       if (segment) pathParts.push(`M${segment[0]},${segment[1]}L${segment[2]},${segment[3]}`);
     }
     if (pathParts.length) root.append(svgNode('path', { class: 'chart-path', d: pathParts.join(' '), fill: 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round', 'aria-hidden': 'true' }));
 
-    const last = this.albums.at(-1);
-    if (knownSales(last)) {
-      const tail = clippedLine(x(this.albums.length - 1), y(last.firstWeekSales), x(this.albums.length), y(last.firstWeekSales), box);
-      if (tail) root.append(svgNode('path', { class: 'chart-finish-path', d: `M${tail[0]},${tail[1]}L${tail[2]},${tail[3]}`, fill: 'none', 'stroke-dasharray': '4 4', 'aria-hidden': 'true' }));
+    const first = this.albums[0];
+    if (knownSales(first)) {
+      const departure = clippedLine(x(0), y(0), x(1), y(first.firstWeekSales), box);
+      if (departure) root.append(svgNode('path', { class: 'chart-path chart-origin-path', d: `M${departure[0]},${departure[1]}L${departure[2]},${departure[3]}`, fill: 'none', 'aria-hidden': 'true' }));
+    }
+    if (layout.start === 0 && y(0) >= box.top && y(0) <= box.bottom) {
+      const origin = svgNode('circle', { class: 'chart-origin', cx: x(0), cy: y(0), r: 2.5, fill: 'currentColor', 'data-origin': 'true' });
+      origin.append(svgNode('title', {}, '가상 시작점 · 0장 · 앨범 판매 관측값 아님'));
+      root.append(origin);
+      root.append(svgNode('text', { class: 'chart-album-label', x: x(0), y: layout.titleY, 'text-anchor': 'middle', 'font-size': 10 }, '시작'));
     }
 
     const visible = [];
     let previousUnknownLabelX = -Infinity;
     for (let index = 0; index < this.albums.length; index += 1) {
       const album = this.albums[index];
-      const pointX = x(index);
+      const pointX = x(index + 1);
       if (pointX < box.left - .1 || pointX > box.right + .1) continue;
       const point = { album, index, x: clamp(pointX, box.left, box.right), y: knownSales(album) ? y(album.firstWeekSales) : null };
       visible.push(point);
@@ -201,9 +207,6 @@ export class SalesChartView {
     }
 
     this._drawLabels(root, visible, layout);
-    if (this.albums.length >= layout.start && this.albums.length <= layout.end) {
-      root.append(svgNode('text', { class: 'chart-album-label', x: clamp(x(this.albums.length), 15, width - 15), y: layout.titleY, 'text-anchor': 'middle', 'font-size': 10 }, '완주'));
-    }
     this._drawMarker(root, snapshot, layout);
     this.svg.replaceChildren(root);
   }
@@ -215,11 +218,10 @@ export class SalesChartView {
       const indices = new Set([0, this.albums.length - 1, layout.albumIndex, Math.floor((this.albums.length - 1) / 2)]);
       labelPoints = visible.filter(point => indices.has(point.index));
     }
-    let previousLabelX = -Infinity;
+    let previousLabelX = layout.start === 0 ? box.left : -Infinity;
     for (const point of labelPoints) {
       const labelX = clamp(point.x, 26, width - 26);
       if (labelX - previousLabelX < 52) continue;
-      if (layout.end >= this.albums.length && x(this.albums.length) - labelX < 38) continue;
       const title = shortAlbumTitle(point.album, width < 420 ? 6 : 8);
       const text = svgNode('text', { class: 'chart-album-label', x: labelX, y: layout.titleY, 'text-anchor': 'middle', 'font-size': 10, 'data-current': point.index === layout.albumIndex }, title);
       text.append(svgNode('title', {}, point.album.title));
@@ -250,7 +252,7 @@ export class SalesChartView {
     const position = snapshot.position;
     const current = snapshot.currentAlbum || this.albums[layout.albumIndex];
     const markerX = clamp(x(position.plotIndex), box.left, box.right);
-    const known = Number.isFinite(position.yValue) && position.yValue > 0;
+    const known = Number.isFinite(position.yValue) && position.yValue >= 0;
     const markerY = known ? clamp(y(position.yValue), box.top, box.bottom) : (box.top + box.bottom) / 2;
     const frameSize = 28;
     const frameX = clamp(markerX - frameSize / 2, 2, Math.max(2, width - frameSize - 2));

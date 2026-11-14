@@ -27,13 +27,24 @@ test('follow mode magnifies a non-zero range while containing every -2..+3 neigh
 
 test('overview retains a zero baseline and contains outliers outside the follow window', () => {
   const anchors = albums([1000, 1010, 1020, 1030, 1040, 1000000]);
-  const follow = createSalesAxis(anchors);
+  const follow = createSalesAxis(anchors, { albumIndex: 1 });
   const overview = createSalesAxis(anchors, { overview: true });
   assert.ok(follow.minimum > 0);
   assert.ok(follow.maximum < 1000000);
   assert.equal(overview.minimum, 0);
   assert.ok(overview.maximum >= 1000000);
   assert.equal(overview.ticks[0], 0);
+});
+
+test('the first course interval includes the virtual zero departure without changing album sales', () => {
+  const anchors = albums([1000, 1100, 1200]);
+  const first = createSalesAxis(anchors, { albumIndex: 0 });
+  assert.equal(first.minimum, 0);
+  assert.ok(first.maximum > 1200);
+  assert.equal(salesToY(0, first, 20, 180), 180);
+  const second = createSalesAxis(anchors, { albumIndex: 1 });
+  assert.ok(second.minimum > 0);
+  assert.deepEqual(anchors.map(album => album.firstWeekSales), [1000, 1100, 1200]);
 });
 
 test('one observation, equal values, and unknown windows never create a zero span or fake point', () => {
@@ -70,7 +81,7 @@ function viewFixture(t, anchors) {
   const view = new SalesChartView({ svg, stage, albums: anchors });
   const update = (index, ratio) => view.update({
     currentAlbum: anchors[index], album: { index, ratio },
-    position: { plotIndex: index + ratio, yValue: anchors[index].firstWeekSales, kind: 'anchor' }
+    position: { plotIndex: index + ratio, yValue: index ? anchors[index - 1].firstWeekSales + (anchors[index].firstWeekSales - anchors[index - 1].firstWeekSales) * ratio : anchors[index].firstWeekSales * ratio, kind: index === 0 && ratio === 0 ? 'origin' : 'interpolated' }
   });
   const nodes = () => {
     const result = [];
@@ -99,6 +110,22 @@ test('typing and resizing keep the scale fixed until the album changes, and over
   assert.deepEqual({ min: svg.dataset.yMin, max: svg.dataset.yMax }, initial);
   update(2, 0);
   assert.notEqual(svg.dataset.yMax, initial.max, 'the newly neighbouring outlier changes the next album scale');
+});
+
+test('the SVG draws a zero departure and album arrivals, with no extra finish interval', t => {
+  const anchors = albums([1000, 2000]);
+  const { nodes, update } = viewFixture(t, anchors);
+  const origin = nodes().find(node => node.attributes['data-origin'] === 'true');
+  const first = nodes().find(node => node.attributes['data-album-id'] === 'album-0');
+  const last = nodes().find(node => node.attributes['data-album-id'] === 'album-1');
+  assert.ok(Number(first.attributes.cx) > Number(origin.attributes.cx));
+  assert.ok(Number(last.attributes.cx) > Number(first.attributes.cx));
+  assert.ok(nodes().some(node => node.attributes.class === 'chart-path chart-origin-path'));
+  assert.ok(!nodes().some(node => node.attributes.class === 'chart-finish-path'));
+  assert.match(nodes().find(node => node.name === 'desc').textContent, /모든 곡을 입력하면 해당 앨범 점에 도착/);
+  update(0, 0);
+  const marker = nodes().find(node => node.attributes.class === 'chart-marker');
+  assert.equal(marker.attributes.cy, origin.attributes.cy);
 });
 
 test('anchor descriptions distinguish Oricon, fan sources, and unspecified counting systems', t => {

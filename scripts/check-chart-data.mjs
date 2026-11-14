@@ -271,23 +271,25 @@ function checkIntegration(course, albumMap, rows) {
   let priorX = 0;
   let interpolated = 0;
   let unknown = 0;
-  let finishTail = 0;
+  let origin = 0;
   let checkedBoundaries = 0;
   const noMovement = (before, after, label) => assert.deepEqual(after.position, before.position, label);
   function examine(point) {
     const current = albumMap.get(point.currentAlbum.id);
-    const next = course.albums[current.order + 1] || null;
-    const from = rows.get(current.id).sales;
-    const to = next ? rows.get(next.id).sales : null;
+    const previous = course.albums[current.order - 1] || null;
+    const from = previous ? rows.get(previous.id).sales : 0;
+    const to = rows.get(current.id).sales;
     assert.ok(point.position.xRatio >= priorX, '오타 수정·Backspace·재입력으로 진행 위치가 뒤로 가면 안 됩니다.');
     priorX = point.position.xRatio;
     close(point.position.plotIndex, current.order + point.album.ratio, '앨범 구간 위치');
     close(point.position.xRatio, point.position.plotIndex / course.albums.length, '차트 전체 위치');
     assert.equal(point.position.hasKnownY, point.position.yValue !== null);
-    assert.equal(point.currentAlbum.firstWeekSales, from, '현재 앨범의 실판매량을 중간 보간값으로 바꾸면 안 됩니다.');
+    assert.equal(point.currentAlbum.firstWeekSales, to, '현재 앨범의 실판매량을 중간 보간값으로 바꾸면 안 됩니다.');
+    assert.equal(point.position.fromAlbumId, previous?.id ?? null);
+    assert.equal(point.position.toAlbumId, current.id);
     if (point.position.kind === 'interpolated') {
       interpolated += 1;
-      assert.ok(next && from !== null && to !== null);
+      assert.ok(from !== null && to !== null);
       assert.equal(point.position.anchorAlbumId, null, '중간 위치는 실제 판매 관측점이 아닙니다.');
       assert.ok(point.position.intervalRatio > 0 && point.position.intervalRatio < 1);
       close(point.position.yValue, from + (to - from) * point.position.intervalRatio, '보간된 이동 위치');
@@ -300,12 +302,12 @@ function checkIntegration(course, albumMap, rows) {
       assert.ok(observed && observed.sales !== null);
       assert.equal(point.position.yValue, observed.sales, '관측점의 값은 해당 앨범의 출처 있는 판매량이어야 합니다.');
       assert.ok(point.position.intervalRatio === 0 || point.position.intervalRatio === 1);
-    } else if (point.position.kind === 'finish-tail') {
-      finishTail += 1;
-      assert.equal(current.order, course.albums.length - 1);
-      assert.equal(point.position.toAlbumId, null);
-      assert.equal(point.position.yValue, from, '완주용 꼬리 구간에 새 판매량을 만들면 안 됩니다.');
-      if (point.album.ratio > 0) assert.equal(point.position.anchorAlbumId, null);
+    } else if (point.position.kind === 'origin') {
+      origin += 1;
+      assert.equal(current.order, 0);
+      assert.equal(point.position.plotIndex, 0);
+      assert.equal(point.position.yValue, 0, '0은 판매량 관측값이 아닌 가상 시작점이어야 합니다.');
+      assert.equal(point.position.anchorAlbumId, null);
     } else assert.fail(`알 수 없는 차트 위치 유형: ${point.position.kind}`);
     return point;
   }
@@ -313,6 +315,8 @@ function checkIntegration(course, albumMap, rows) {
   const initial = chart.snapshot();
   assert.equal(initial.status, 'ready');
   assert.equal(initial.position.plotIndex, 0);
+  assert.equal(initial.position.yValue, 0);
+  assert.equal(initial.position.kind, 'origin');
   noMovement(initial, chart.snapshot(), '시작 전 자동 이동은 없어야 합니다.');
   let state = session.start(now);
   couple(state);
@@ -326,7 +330,7 @@ function checkIntegration(course, albumMap, rows) {
       assert.equal(atTrackStart.currentAlbum.id, track.albumId);
       assert.equal(atTrackStart.album.ratio, 0);
       assert.equal(atTrackStart.position.plotIndex, album.order);
-      assert.equal(atTrackStart.position.anchorAlbumId, track.albumId);
+      assert.equal(atTrackStart.position.anchorAlbumId, course.albums[album.order - 1]?.id ?? null);
     }
     const stopped = couple(session.snapshot(now += 1000));
     noMovement(atTrackStart, stopped, '타이핑을 멈추면 차트도 제자리에 있어야 합니다.');
@@ -359,6 +363,7 @@ function checkIntegration(course, albumMap, rows) {
         assert.equal(state.advanced, false);
         if (index === album.start + album.count - 1) {
           close(point.position.plotIndex, album.order + 1, '마지막 글자 조합이 끝난 앨범 경계');
+          assert.equal(point.position.anchorAlbumId, album.id, '현재 앨범의 모든 곡을 쳤을 때 그 앨범 지점에 도착해야 합니다.');
         }
         state = session.updateInput(value, now += 10, { isComposing: false });
         couple(state);
@@ -367,6 +372,10 @@ function checkIntegration(course, albumMap, rows) {
     assert.equal(state.index, index + 1, `${track.title}: 정답은 정확히 한 곡만 전진해야 합니다.`);
     assert.equal(state.advanced, true);
     assert.equal(state.completedTrack.id, track.id);
+    if (index === album.start + album.count - 1) {
+      close(chart.snapshot().position.plotIndex, album.order + 1, '앨범 수록곡 완료 시 도착 위치');
+      assert.equal(chart.snapshot().position.anchorAlbumId, album.id);
+    }
   }
   assert.equal(checkedBoundaries, course.albums.length);
   assert.equal(state.status, 'completed');
@@ -376,11 +385,12 @@ function checkIntegration(course, albumMap, rows) {
   assert.equal(done.course.ratio, 1);
   assert.equal(done.position.plotIndex, course.albums.length);
   assert.equal(done.position.xRatio, 1);
-  assert.equal(done.position.kind, 'finish-tail');
-  assert.equal(done.position.anchorAlbumId, null, '종점은 새로운 초동 관측점이 아닙니다.');
-  assert.ok(finishTail > 0);
+  const lastAlbum = course.albums.at(-1);
+  assert.equal(done.position.kind, rows.get(lastAlbum.id).sales === null ? 'unknown' : 'anchor');
+  assert.equal(done.position.anchorAlbumId, lastAlbum.id, '마지막 앨범 완료는 그 앨범 관측점에 도착해야 합니다.');
+  assert.ok(origin > 0);
   assert.deepEqual(chart.albums.map(album => ({ id: album.id, sales: album.firstWeekSales })), observedBefore, '게임 이동이 원래 판매 관측값을 수정하면 안 됩니다.');
-  assert.equal(chart.albums.length, course.albums.length, '가상 완주 꼬리를 실제 앨범 관측점에 추가하면 안 됩니다.');
+  assert.equal(chart.albums.length, course.albums.length, '가상 시작점은 실제 앨범 관측점에 추가하면 안 됩니다.');
   noMovement(done, chart.update({ index: 0, prefixRatio: 0, status: 'running' }), '완주 후에는 위치를 고정해야 합니다.');
   const frozen = session.snapshot(now += 1000);
   assert.equal(frozen.stats.elapsedMs, state.stats.elapsedMs);
@@ -396,7 +406,7 @@ function checkIntegration(course, albumMap, rows) {
   assert.equal(clean.stats.accuracy, 100);
   const expectedStrokes = course.tracks.reduce((sum, track) => sum + countStrokes(track.title), 0);
   assert.equal(clean.stats.correctStrokes, expectedStrokes);
-  return { expectedStrokes, interpolated, unknown, finishTail, checkedBoundaries };
+  return { expectedStrokes, interpolated, unknown, origin, checkedBoundaries };
 }
 
 async function main() {
@@ -412,7 +422,7 @@ async function main() {
   console.log(`판매량 ID 1:1 · 수치 ${known.length}건(근사치 ${known.filter(row => row.approximate).length}, 비공식 ${unofficial.length}) · 미확인 ${records.length - known.length}건(null)`);
   console.log(`기간 검사 통과: 발매 첫 7일 ${records.length - oricon.length}건 · 오리콘 달력 첫 주 ${oricon.length}건${oricon.map(row => ` (${row.periodStart}~${row.periodEnd})`).join('')}`);
   console.log(`전체 입력 표기 완주 ${integration.expectedStrokes}타 · 사용자 표기 ${typingNames.size}곡 · 앨범 경계 ${integration.checkedBoundaries}회 · prefix/정지/오타/Backspace/일시정지/완주 고정 통과`);
-  console.log(`이동 위치 분리: 보간 ${integration.interpolated}회 · 미확인 ${integration.unknown}회 · 가상 완주 꼬리 ${integration.finishTail}회 · 판매 관측값 불변`);
+  console.log(`이동 위치 분리: 가상 시작점 ${integration.origin}회 · 보간 ${integration.interpolated}회 · 미확인 ${integration.unknown}회 · 앨범 완료 시 현재 앨범 도착 · 판매 관측값 불변`);
 }
 
 try { await main(); }

@@ -93,29 +93,28 @@ export class ChartProgress {
     const trackOffset = completed ? group.count : this.index - group.start;
     const albumRatio = completed ? 1 : Math.min(1, (trackOffset + this.prefixRatio) / group.count);
     const courseRatio = completed ? 1 : (this.index + this.prefixRatio) / this.totalTracks;
-    const next = this.albums[group.index + 1] || null;
+    const previous = this.albums[group.index - 1] || null;
     const current = group.album;
     const plotIndex = group.index + albumRatio;
     let yValue = null;
     let kind;
     let anchorAlbumId = null;
 
-    if (!next) {
-      // A dotted, non-measured finish tail gives the last album its own course
-      // interval. It repeats the last y; it does not add a sales observation.
-      yValue = current.firstWeekSales;
-      kind = 'finish-tail';
-      if (albumRatio === 0) anchorAlbumId = current.id;
+    if (albumRatio === 0 && !previous) {
+      // Zero is a virtual departure point, never an album sales observation.
+      yValue = 0;
+      kind = 'origin';
     } else if (albumRatio === 0) {
+      yValue = previous.firstWeekSales;
+      kind = yValue === null ? 'unknown' : 'anchor';
+      anchorAlbumId = previous.id;
+    } else if (albumRatio === 1) {
       yValue = current.firstWeekSales;
       kind = yValue === null ? 'unknown' : 'anchor';
       anchorAlbumId = current.id;
-    } else if (albumRatio === 1) {
-      yValue = next.firstWeekSales;
-      kind = yValue === null ? 'unknown' : 'anchor';
-      anchorAlbumId = next.id;
-    } else if (current.firstWeekSales !== null && next.firstWeekSales !== null) {
-      yValue = current.firstWeekSales + (next.firstWeekSales - current.firstWeekSales) * albumRatio;
+    } else if ((!previous || previous.firstWeekSales !== null) && current.firstWeekSales !== null) {
+      const from = previous?.firstWeekSales ?? 0;
+      yValue = from + (current.firstWeekSales - from) * albumRatio;
       kind = 'interpolated';
     } else {
       // Neither the cursor nor a line segment may imply zero for unknown data.
@@ -130,8 +129,8 @@ export class ChartProgress {
       position: {
         plotIndex,
         xRatio: plotIndex / this.albums.length,
-        fromAlbumId: current.id,
-        toAlbumId: next?.id ?? null,
+        fromAlbumId: previous?.id ?? null,
+        toAlbumId: current.id,
         intervalRatio: albumRatio,
         yValue,
         kind,

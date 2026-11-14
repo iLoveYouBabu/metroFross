@@ -3,20 +3,59 @@ import { ChartProgress } from './chart-progress.mjs';
 import { SalesChartView } from './chart-view.mjs';
 import { attachInputController } from './input-controller.mjs';
 import { createCountdown } from './countdown.mjs';
+import { buildCourse, catalogFingerprint, bestForCourse } from './course-selection.mjs';
+import { createPersonalRecords } from './personal-records.mjs';
+import { createHomeRecords } from './home-records.mjs';
+import { createRankingClient, normalizeNickname } from './ranking-client.mjs';
 
 const byId = id => document.getElementById(id);
 const ui = Object.fromEntries(['album-cover','album-name','album-sales','cpm','accuracy','elapsed','typing-input','target-text','typing-line','input-hint','state-label','track-counter','upcoming-tracks','course-progress','progress-fill','progress-percentage','journey-label','play-button','restart-button','game-board','result-panel','result-description','result-time','result-cpm','result-accuracy','best-message','album-memories','best-record','course-summary','course-count','chart-note','chart-view-label','chart-view-button','error-message','announcement','catalog-dialog','catalog-list','catalog-scope','sales-definition','sources-list','excluded-summary','catalog-updated','restart-dialog'].map(id => [id,byId(id)]));
 const input = ui['typing-input'];
 const clock = () => performance.now();
-const storageKey = 'fromis-chart-best-v2';
+let safeStorage;try{safeStorage=localStorage;}catch{}
+const personalRecords=createPersonalRecords(safeStorage);
 let catalog, salesData, albums, courseTracks, session, chartModel, chartView, signature, inputController;
+let courseCatalog, fullCourse, activeCourse, previewCourse, selectedIds=new Set(), recordsPanel, rankingConfig={enabled:false}, rankingClient=createRankingClient({enabled:false}), runContext;
 let best = null, lastResult = null, shownAlbum = null, lastFinished = false, overview = false;
 let catalogWasRunning = false, restartWasRunning = false, restartAction = 'restart', tick = null, phase = 'home';
 for(const id of ['home-screen','game-screen','home-albums','home-course-count','home-best','start-button','countdown-overlay','countdown-number','sales-label','load-error'])ui[id]=byId(id);
+for(const id of ['nickname-input','nickname-status','course-mode-badge','course-eligibility','ranking-result-status'])ui[id]=byId(id);
 
 function readStorage(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
 function writeStorage(key,value) { try { localStorage.setItem(key,JSON.stringify(value)); } catch {} }
 function announce(text) { ui.announcement.textContent = text; }
+function deviceCategory(){return matchMedia('(pointer:coarse)').matches?'mobile':'pc';}
+function uniqueId(){return crypto.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;}
+function nicknameError(text){ui['nickname-status'].textContent=text;ui['nickname-status'].classList.toggle('has-error',Boolean(text));ui['nickname-input'].setAttribute('aria-invalid',String(Boolean(text)));}
+function nicknameValue(){return normalizeNickname(ui['nickname-input'].value);}
+function saveNicknameLocally(value){writeStorage('fromis-player-profile-v1',{nickname:value});ui['nickname-input'].value=value;nicknameError('');ui['nickname-status'].textContent='닉네임을 이 기기에 저장했어요.';}
+byId('save-nickname').addEventListener('click',async()=>{let nickname;try{nickname=nicknameValue();}catch(error){nicknameError(error.message);return;}saveNicknameLocally(nickname);const button=byId('save-nickname');button.disabled=true;try{await rankingClient.setNickname(nickname);ui['nickname-status'].textContent='닉네임을 저장했어요.';recordsPanel?.refresh();}catch{ui['nickname-status'].textContent='이 기기에 저장했어요. 온라인 연결은 준비 중이에요.';}finally{button.disabled=false;}});
+ui['nickname-input'].addEventListener('input',()=>nicknameError(''));
+function updatePicker(){
+  for(const checkbox of ui['home-albums'].querySelectorAll('input'))checkbox.checked=selectedIds.has(checkbox.value);
+  try{previewCourse=buildCourse(courseCatalog,[...selectedIds]);}catch{previewCourse=null;}
+  ui['start-button'].disabled=!previewCourse;
+  ui['home-course-count'].textContent=previewCourse?`${previewCourse.albums.length}앨범 · ${previewCourse.trackCount}곡`:'앨범을 하나 이상 골라주세요.';
+  const full=previewCourse?.isFullCourse;
+  ui['course-mode-badge'].textContent=full?'전체 코스 · 랭킹 대상':'선택 코스 · 연습';ui['course-mode-badge'].classList.toggle('practice',!full);
+  ui['course-eligibility'].textContent=full?'모든 앨범을 완주하면 주간·전체 랭킹에 기록을 남겨요.':'선택한 앨범은 발매순으로 플레이해요. 연습 기록은 개인 기록에만 남아요.';
+  writeStorage('fromis-selected-albums-v1',[...selectedIds]);renderBest();
+}
+ui['home-albums'].addEventListener('change',event=>{if(phase!=='home'||!event.target.matches('input[type=checkbox]'))return;const id=event.target.value;if(event.target.checked)selectedIds.add(id);else selectedIds.delete(id);updatePicker();});
+byId('select-all-albums').addEventListener('click',()=>{if(!catalog)return;selectedIds=new Set(catalog.albums.map(album=>album.id));updatePicker();});
+byId('clear-albums').addEventListener('click',()=>{selectedIds.clear();updatePicker();});
+function prepareCourse(course){
+  activeCourse=course;courseTracks=course.tracks;signature=course.signature;session=new TypingSession(courseTracks);chartModel=new ChartProgress({albums:course.albums,tracks:courseTracks});
+  chartView?.destroy();chartView=new SalesChartView({svg:byId('sales-chart'),stage:byId('chart-stage'),albums:course.albums});
+  ui['course-count'].textContent=`${course.albums.length}앨범 · ${course.trackCount}곡${course.isFullCourse?'':' · 연습'}`;
+  ui['course-summary'].textContent=`${course.isFullCourse?'전체 코스 · 랭킹 대상':'선택 앨범 연습 · 랭킹 제외'} · 비공식 집계 포함`;
+}
+function createRunContext(nickname){
+  const context={id:uniqueId(),course:activeCourse,nickname,device:deviceCategory(),client:rankingClient};
+  context.onlineEligible=false;context.ticketReady=false;
+  context.rankingStart=(context.course.isFullCourse&&context.client.configured?(async()=>{await context.client.setNickname(nickname);return context.client.startRun({albumIds:context.course.albumIds,fullCourse:true,device:context.device});})().catch(error=>({error})):Promise.resolve({eligible:false,reason:context.course.isFullCourse?'not-configured':'practice'})).then(ticket=>{context.ticket=ticket;context.ticketReady=true;return ticket;});
+  return context;
+}
 function formatTime(milliseconds, precise = false) {
   const tenths = Math.max(0,Math.floor(milliseconds/100));
   return `${String(Math.floor(tenths/600)).padStart(2,'0')}:${String(Math.floor(tenths/10)%60).padStart(2,'0')}${precise ? '.' + tenths%10 : ''}`;
@@ -68,7 +107,7 @@ function renderProgress(state) {
   ui['course-progress'].setAttribute('aria-valuenow',String(Math.round(progress)));
   ui['course-progress'].setAttribute('aria-valuetext',`${state.progress.total}곡 중 ${state.progress.completed}곡 완료`);
   ui['journey-label'].textContent=`앨범 여정 · ${state.progress.completed} / ${state.progress.total}곡`;
-  ui['chart-note'].textContent=snapshot.position.hasKnownY?'점은 첫 주 판매량 · 일본 EP는 오리콘 집계예요.':'초동 미확인 구간 · 숫자를 추정해서 연결하지 않아요.';
+  ui['chart-note'].textContent=snapshot.position.hasKnownY?'앨범의 모든 곡을 치면 그 앨범 점에 도착해요.':'초동 미확인 구간 · 숫자를 추정해서 연결하지 않아요.';
 }
 function render(state) {
   renderMetrics(state);
@@ -86,6 +125,7 @@ function render(state) {
   if(phase==='countdown')hint='카운트다운 뒤 자동으로 시작해요.';
   ui['input-hint'].textContent=hint;ui['input-hint'].title=hint;ui['input-hint'].classList.toggle('has-error',state.hasError);
   ui['state-label'].textContent=({ready:'준비',running:'입력 중',paused:'일시정지'})[state.status];
+  if(state.status==='running'&&runContext&&!runContext.onlineEligible)ui['state-label'].textContent=runContext.course.isFullCourse?'입력 중 · 개인 기록':'입력 중 · 연습';
   ui['play-button'].textContent=({ready:'시작하기',running:'일시정지',paused:'계속하기'})[state.status];
   ui['play-button'].disabled=phase!=='game';ui['restart-button'].disabled=phase!=='game';
 }
@@ -110,30 +150,37 @@ byId('cancel-restart').addEventListener('click',()=>ui['restart-dialog'].close()
 byId('confirm-restart').addEventListener('click',()=>{restartWasRunning=false;ui['restart-dialog'].close();if(restartAction==='home')showHome();else beginRun();});
 ui['restart-dialog'].addEventListener('close',()=>{if(restartWasRunning)resume();restartWasRunning=false;});
 byId('replay-button').addEventListener('click',()=>beginRun());
-function renderBest(){const text=best?`나의 최고 기록 ${formatTime(best.elapsedMs,true)}`:'';ui['best-record'].textContent=text;ui['home-best'].textContent=text;}
+function renderBest(){const course=phase==='home'?previewCourse:activeCourse;best=course?bestForCourse(personalRecords.list(),course.signature,deviceCategory()):null;const text=best?`이 코스 개인 최고 ${formatTime(best.elapsedMs,true)}`:'';ui['best-record'].textContent=text;ui['home-best'].textContent=text;recordsPanel?.summary();}
 
-const countdown=createCountdown({onTick:number=>{const digit=document.createElement('span');digit.className='countdown-digit';digit.textContent=String(number);ui['countdown-number'].replaceChildren(digit);},onDone:()=>{if(phase!=='countdown'||document.hidden)return;phase='game';ui['countdown-overlay'].hidden=true;render(session.start(clock()));focusInput();announce('시작! 보이는 제목을 따라 입력해주세요.');}});
-function beginRun(){if(!session)return;countdown.cancel();inputController?.cancel();phase='countdown';ui['home-screen'].hidden=true;ui['game-screen'].hidden=false;reset({focus:false});ui['countdown-overlay'].hidden=false;input.disabled=false;input.readOnly=false;input.focus({preventScroll:true});updateViewport();countdown.start();}
-function showHome({focus=true}={}){countdown.cancel();inputController?.cancel();phase='home';ui['countdown-overlay'].hidden=true;if(session)reset({focus:false});ui['game-screen'].hidden=true;ui['home-screen'].hidden=false;input.blur();updateViewport();if(focus)ui['start-button'].focus({preventScroll:true});}
+const countdown=createCountdown({onTick:number=>{const digit=document.createElement('span');digit.className='countdown-digit';digit.textContent=String(number);ui['countdown-number'].replaceChildren(digit);},onDone:()=>{if(phase!=='countdown'||document.hidden)return;runContext.onlineEligible=Boolean(runContext.course.isFullCourse&&runContext.ticketReady&&runContext.ticket?.eligible);phase='game';ui['countdown-overlay'].hidden=true;render(session.start(clock()));focusInput();announce('시작! 보이는 제목을 따라 입력해주세요.');}});
+function beginRun(){if(!previewCourse)return;let nickname;try{nickname=nicknameValue();}catch(error){nicknameError(error.message);ui['nickname-input'].focus();return;}saveNicknameLocally(nickname);countdown.cancel();inputController?.cancel();phase='countdown';document.body.classList.remove('is-home');ui['home-screen'].hidden=true;ui['game-screen'].hidden=false;prepareCourse(previewCourse);runContext=createRunContext(nickname);reset({focus:false});ui['countdown-overlay'].hidden=false;input.disabled=false;input.readOnly=false;input.focus({preventScroll:true});updateViewport();countdown.start();}
+function showHome({focus=true}={}){countdown.cancel();inputController?.cancel();phase='home';document.body.classList.add('is-home');ui['countdown-overlay'].hidden=true;if(session)reset({focus:false});ui['game-screen'].hidden=true;ui['home-screen'].hidden=false;input.blur();updateViewport();if(courseCatalog)updatePicker();recordsPanel?.refresh();if(focus)ui['start-button'].focus({preventScroll:true});}
 ui['start-button'].addEventListener('click',beginRun);
 byId('cancel-countdown').addEventListener('click',()=>showHome());
 document.querySelector('.brand').addEventListener('click',event=>{if(!session)return;event.preventDefault();if(phase==='game'&&session.status!=='completed')confirmLeave('home');else showHome();});
 function finish(state) {
   input.readOnly=true;input.blur();ui['game-board'].hidden=false;ui['game-board'].classList.add('is-completed');ui['result-panel'].hidden=false;
   chartView.update(chartModel.update({index:courseTracks.length,status:'completed'}));setOverview(true);
-  ui['journey-label'].textContent=`${catalog.albums.length}앨범 · ${courseTracks.length}곡 완주`;ui['progress-percentage'].textContent='100%';ui['progress-fill'].style.width='100%';
+  ui['journey-label'].textContent=`${activeCourse.albums.length}앨범 · ${courseTracks.length}곡 완주`;ui['progress-percentage'].textContent='100%';ui['progress-fill'].style.width='100%';
   ui['course-progress'].setAttribute('aria-valuenow','100');ui['course-progress'].setAttribute('aria-valuetext','모든 앨범 완주');
   updateViewport();if(lastFinished)return;lastFinished=true;
-  const previous=best,record={signature,elapsedMs:state.stats.elapsedMs,cpm:Math.round(state.stats.cpm),accuracy:Number(state.stats.accuracy.toFixed(1)),completedAt:new Date().toISOString()};
-  const isBest=!previous||record.elapsedMs<previous.elapsedMs;if(isBest){best=record;writeStorage(storageKey,record);}lastResult=record;
-  ui['result-description'].textContent=`${catalog.albums.length}개 실물 앨범의 ${courseTracks.length}곡을 발매순으로 완주했어요.`;
+  const context=runContext,previous=bestForCourse(personalRecords.list(),signature,context.device),record={id:uniqueId(),signature,courseVersion:rankingConfig.courseVersion||'local',albumIds:[...activeCourse.albumIds],albumTitles:activeCourse.albums.map(album=>album.title),trackCount:courseTracks.length,isFullCourse:activeCourse.isFullCourse,device:context.device,nickname:context.nickname,elapsedMs:state.stats.elapsedMs,cpm:Math.round(state.stats.cpm),accuracy:Number(state.stats.accuracy.toFixed(1)),completedAt:new Date().toISOString()};
+  const isBest=!previous||record.elapsedMs<previous.elapsedMs;personalRecords.add(record);lastResult=record;
+  ui['result-description'].textContent=`${activeCourse.albums.length}개 앨범의 ${courseTracks.length}곡을 발매순으로 완주했어요.${activeCourse.isFullCourse?'':' 선택 앨범 연습 코스예요.'}`;
   ui['result-time'].textContent=formatTime(record.elapsedMs,true);ui['result-cpm'].textContent=String(record.cpm);ui['result-accuracy'].textContent=`${record.accuracy}%`;
-  ui['best-message'].textContent=isBest?(previous?`이전 최고 기록보다 ${((previous.elapsedMs-record.elapsedMs)/1000).toFixed(1)}초 빨라졌어요.`:'첫 앨범 코스 완주 기록을 남겼어요.'): `나의 최고 기록 ${formatTime(best.elapsedMs,true)}`;
-  const fragment=document.createDocumentFragment();catalog.albums.forEach(album=>{const image=document.createElement('img');image.src=album.cover;image.alt=album.title;image.title=album.title;image.width=33;image.height=33;image.onerror=()=>image.hidden=true;fragment.append(image);});
-  ui['album-memories'].replaceChildren(fragment);renderBest();byId('replay-button').focus({preventScroll:true});
+  ui['best-message'].textContent=isBest?(previous?`이 코스의 최고 기록보다 ${((previous.elapsedMs-record.elapsedMs)/1000).toFixed(1)}초 빨라졌어요.`:'이 코스의 첫 개인 기록을 남겼어요.'): `이 코스 개인 최고 ${formatTime(previous.elapsedMs,true)}`;
+  const fragment=document.createDocumentFragment();activeCourse.albums.forEach(album=>{const image=document.createElement('img');image.src=album.cover;image.alt=album.title;image.title=album.title;image.width=33;image.height=33;image.onerror=()=>image.hidden=true;fragment.append(image);});
+  ui['album-memories'].replaceChildren(fragment);renderBest();byId('replay-button').focus({preventScroll:true});saveCompletionRanking(record,state,context);
+}
+async function saveCompletionRanking(record,state,context){
+  const show=text=>{if(runContext?.id===context.id)ui['ranking-result-status'].textContent=text;};
+  if(!context.course.isFullCourse){show('선택 앨범 연습 기록은 개인 기록에 저장했어요. 주간·전체 랭킹에는 포함되지 않아요.');return;}
+  if(!context.onlineEligible){show('온라인 랭킹 연결을 완료하지 못했어요. 개인 기록은 이 기기에 저장했어요.');return;}
+  show('전체 코스 기록을 랭킹에 저장하고 있어요.');
+  try{const result=await context.client.finishRun({runId:context.ticket.run_id,fullCourse:context.course.isFullCourse,completedTrackCount:state.progress.completed,elapsedMs:record.elapsedMs,correctStrokes:state.stats.correctStrokes,attemptedStrokes:state.stats.attemptedStrokes});if(result.eligible){personalRecords.uploaded(record.id,context.ticket.run_id);show('전체 코스 기록을 주간·전체 랭킹에 남겼어요.');if(phase==='home')recordsPanel?.refresh();}else show('이 기록은 개인 기록에만 저장했어요.');}catch{show('온라인 랭킹에 저장하지 못했어요. 개인 기록은 이 기기에 저장했어요.');}
 }
 byId('copy-button').addEventListener('click',async()=>{
-  if(!lastResult)return;const text=`fromis_9 chart journey\n${catalog.albums.length}앨범 · ${courseTracks.length}곡 완주 · ${formatTime(lastResult.elapsedMs,true)}\n${lastResult.cpm}타 · 정확도 ${lastResult.accuracy}%\n${location.href.split('?')[0]}`;
+  if(!lastResult)return;const text=`fromis_9 chart journey\n${lastResult.albumIds.length}앨범 · ${lastResult.trackCount}곡 ${lastResult.isFullCourse?'전체 완주':'연습 완주'} · ${formatTime(lastResult.elapsedMs,true)}\n${lastResult.cpm}타 · 정확도 ${lastResult.accuracy}%\n${location.href.split('?')[0]}`;
   try{await navigator.clipboard.writeText(text);byId('copy-button').textContent='복사했어요';announce('완주 기록을 복사했어요.');setTimeout(()=>byId('copy-button').textContent='기록 복사',1800);}catch{announce('기록을 복사하지 못했어요. 화면의 기록을 확인해주세요.');}
 });
 
@@ -169,14 +216,16 @@ async function initialize() {
     [catalog,salesData]=await Promise.all(responses.map(response=>response.json()));
     const records=new Map(salesData.albums.map(record=>[record.albumId,record]));
     const chartAlbums=catalog.albums.map(album=>{const record=records.get(album.id);return{...album,firstWeekSales:record?.sales??null,approximate:Boolean(record?.approximate),salesRecord:record};});
-    albums=new Map(chartAlbums.map(album=>[album.id,album]));courseTracks=catalog.tracks;
-    session=new TypingSession(courseTracks);chartModel=new ChartProgress({albums:chartAlbums,tracks:courseTracks});chartView=new SalesChartView({svg:byId('sales-chart'),stage:byId('chart-stage'),albums:chartAlbums});
+    albums=new Map(chartAlbums.map(album=>[album.id,album]));courseCatalog={...catalog,albums:chartAlbums};fullCourse=buildCourse(courseCatalog);
+    prepareCourse(fullCourse);
     inputController=attachInputController({input,session:()=>session,now:clock,onState:render,onAnnounce:announce,canInput:()=>phase==='game'&&!ui['catalog-dialog'].open&&!ui['restart-dialog'].open});
-    signature=courseTracks.map(track=>`${track.id}:${normalizeTitle(track.title)}`).join('|');const stored=readStorage(storageKey);best=stored?.signature===signature&&Number.isFinite(stored.elapsedMs)?stored:null;
-    ui['course-count'].textContent=`${chartAlbums.length}앨범 · ${courseTracks.length}곡`;
-    ui['home-course-count'].textContent=ui['course-count'].textContent;
-    const covers=document.createDocumentFragment();chartAlbums.forEach(album=>{const image=document.createElement('img');image.src=album.cover;image.alt=album.title;image.title=album.title;image.width=62;image.height=62;covers.append(image);});ui['home-albums'].replaceChildren(covers);
-    const known=chartAlbums.filter(album=>album.firstWeekSales!==null).length;ui['course-summary'].textContent=`실물 앨범 ${chartAlbums.length}개 · 첫 주 기록 ${known}개 · 비공식 집계 포함`;
+    let nickname=readStorage('fromis-player-profile-v1')?.nickname;try{nickname=normalizeNickname(nickname);}catch{nickname=`플로버${Math.floor(Math.random()*9000+1000)}`;}ui['nickname-input'].value=nickname;writeStorage('fromis-player-profile-v1',{nickname});
+    const storedSelection=readStorage('fromis-selected-albums-v1');selectedIds=new Set(Array.isArray(storedSelection)?storedSelection.filter(id=>albums.has(id)):chartAlbums.map(album=>album.id));
+    const choices=document.createDocumentFragment();chartAlbums.forEach(album=>{const label=document.createElement('label');label.className='album-choice';label.title=album.title;const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=album.id;checkbox.setAttribute('aria-label',`${album.title} 선택`);const frame=document.createElement('span');frame.className='choice-cover';const image=document.createElement('img');image.src=album.cover;image.alt='';image.width=62;image.height=62;frame.append(image);const title=document.createElement('span');title.className='choice-title';title.textContent=album.title;label.append(checkbox,frame,title);choices.append(label);});ui['home-albums'].replaceChildren(choices);
+    try{const response=await fetch('./data/ranking-config.json');if(response.ok)rankingConfig=await response.json();}catch{}
+    if(rankingConfig.catalogHash&&await catalogFingerprint(catalog)===rankingConfig.catalogHash)rankingClient=createRankingClient({...rankingConfig,device:deviceCategory()});
+    const legacy=readStorage('fromis-chart-best-v2');if(!personalRecords.list().length&&legacy?.signature===catalog.tracks.map(track=>`${track.id}:${normalizeTitle(track.title)}`).join('|')){try{personalRecords.add({...legacy,id:`legacy-${legacy.completedAt}`,signature:fullCourse.signature,courseVersion:'legacy',albumIds:[...fullCourse.albumIds],albumTitles:fullCourse.albums.map(album=>album.title),trackCount:fullCourse.trackCount,isFullCourse:true,device:deviceCategory(),nickname});}catch{}}
+    recordsPanel=createHomeRecords({client:rankingClient,records:personalRecords,fullSignature:fullCourse.signature,currentDevice:deviceCategory()});
     ui['catalog-scope'].textContent=catalog.scope;ui['sales-definition'].textContent=salesData.definition;
     ui['excluded-summary'].textContent=`제외 발매: ${(catalog.excluded||[]).map(item=>item.title||item.id).join(', ')}`;
     ui['catalog-updated'].textContent=`목록·자료 확인: ${salesData.updatedAt}`;

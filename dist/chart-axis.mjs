@@ -14,9 +14,9 @@ function axis(minimum, maximum, referenceStart, referenceEnd) {
 }
 
 /**
- * Only measured, positive observations determine the scale. Follow mode keeps
- * the current album's -2..+3 neighbours inside the padded range, including the
- * next anchor reached before an album transition. The view caches this result
+ * Measured, positive observations determine the scale. The first course album
+ * also includes its explicit, non-measured zero departure point. Follow mode
+ * keeps the current album's -2..+3 neighbours inside the padded range. The view caches this result
  * for the whole album; the typing cursor must never determine its own scale.
  */
 export function createSalesAxis(albums, { albumIndex = 0, overview = false, fallback } = {}) {
@@ -25,6 +25,7 @@ export function createSalesAxis(albums, { albumIndex = 0, overview = false, fall
   const referenceStart = overview ? 0 : Math.max(0, index - 2);
   const referenceEnd = overview ? albums.length : Math.min(albums.length, index + 4);
   const values = albums.slice(referenceStart, referenceEnd).filter(hasSales).map(album => album.firstWeekSales);
+  if (!overview && index === 0 && values.length) values.push(0);
   if (!values.length) {
     const validFallback = Number.isFinite(fallback?.minimum) && Number.isFinite(fallback?.maximum) && fallback.maximum > fallback.minimum;
     return axis(overview ? 0 : validFallback ? fallback.minimum : 0, validFallback ? fallback.maximum : 1, referenceStart, referenceEnd);

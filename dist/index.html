@@ -9,8 +9,9 @@
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./chart.css">
+  <link rel="stylesheet" href="./home.css">
 </head>
-<body>
+<body class="is-home">
   <div class="page-shell">
     <header class="site-header">
       <a class="brand" href="./" aria-label="fromis_9 chart journey 처음으로"><span class="brand-name">fromis_9<span class="brand-dot">.</span></span><span class="brand-sub">chart journey</span></a>
@@ -19,13 +20,29 @@
     <main>
       <h1 class="sr-only">프로미스나인 앨범 초동 차트 타이핑</h1>
       <section id="home-screen" class="home-screen" aria-labelledby="home-heading">
-        <div class="home-intro"><span class="eyebrow">FROMIS_9 CHART JOURNEY</span><h2 id="home-heading">우리의 앨범을,<br>한 글자씩.</h2><p class="home-description">곡 제목을 따라 치며<br>프로미스나인의 앨범 차트를 여행해요.</p></div>
-        <div id="home-albums" class="home-albums" aria-label="함께 지나갈 앨범들"></div>
-        <div class="home-course"><span id="home-course-count">앨범 확인 중</span><span>발매순으로 끝까지</span></div>
-        <button id="start-button" class="button primary home-start" type="button" disabled>게임 시작</button>
-        <p class="home-instruction">3·2·1 뒤 시작해요. 제목을 다 치면 자동으로 다음 곡!</p>
-        <p id="home-best" class="home-best"></p>
-        <p class="home-scope">디지털 싱글·OST 제외 · 비공식 집계 포함</p>
+        <div class="home-intro"><span class="eyebrow">FROMIS_9 CHART JOURNEY</span><h2 id="home-heading">우리의 앨범을, 한 글자씩.</h2><p class="home-description">좋아하는 앨범을 고르거나, 모든 앨범을 완주하고 기록을 남겨요.</p></div>
+        <div class="home-grid">
+          <section class="setup-panel" aria-labelledby="setup-heading">
+            <h3 id="setup-heading" class="panel-heading">오늘의 앨범 여정</h3>
+            <label class="field-label" for="nickname-input">닉네임</label><div class="nickname-row"><input id="nickname-input" type="text" maxlength="32" autocomplete="nickname" placeholder="2~16글자" aria-describedby="nickname-status"><button id="save-nickname" class="button quiet" type="button">저장</button></div><p id="nickname-status" class="field-status" role="status">닉네임은 이 기기에 저장돼요.</p>
+            <div class="album-picker-heading"><span class="field-label">플레이할 앨범</span><div><button id="select-all-albums" class="text-button" type="button">전체 선택</button><button id="clear-albums" class="text-button" type="button">선택 해제</button></div></div>
+            <div id="home-albums" class="home-albums" role="group" aria-label="플레이할 앨범 선택"></div>
+            <div class="home-course"><span id="home-course-count">앨범 확인 중</span><strong id="course-mode-badge" class="course-mode-badge">전체 코스</strong></div>
+            <p id="course-eligibility" class="course-eligibility">모든 앨범을 선택한 코스만 랭킹에 반영돼요.</p>
+            <button id="start-button" class="button primary home-start" type="button" disabled>게임 시작</button>
+            <p class="home-instruction">3·2·1 뒤 시작 · 제목을 다 치면 자동으로 다음 곡</p>
+            <p id="home-best" class="home-best"></p>
+            <p class="home-scope">디지털 싱글·OST 제외 · 비공식 집계 포함</p>
+          </section>
+          <section class="records-panel" aria-labelledby="records-heading">
+            <div class="records-heading"><h3 id="records-heading" class="panel-heading">우리의 기록</h3><select id="ranking-device" aria-label="기록 기기"><option value="pc">PC</option><option value="mobile">모바일</option></select></div>
+            <div class="personal-summary"><div><span>전체 코스 개인 최고</span><strong id="personal-best-time">—</strong></div><div><span>이 기기 완주</span><strong id="personal-run-count">0회</strong></div></div>
+            <div class="record-tabs" role="tablist" aria-label="기록 보기"><button id="records-week" type="button" role="tab" aria-selected="true" aria-controls="records-content" data-period="week">주간 랭킹</button><button id="records-all" type="button" role="tab" aria-selected="false" aria-controls="records-content" data-period="all" tabindex="-1">전체 랭킹</button><button id="records-personal" type="button" role="tab" aria-selected="false" aria-controls="records-content" data-period="personal" tabindex="-1">개인 기록</button></div>
+            <div class="records-toolbar"><span id="records-period-label">최근 7일 · 전체 코스</span><button id="refresh-records" class="text-button" type="button">새로고침</button></div>
+            <div id="records-content" class="records-content" role="tabpanel" aria-labelledby="records-week" aria-live="polite"><p class="records-empty">랭킹을 불러오고 있어요.</p></div>
+            <p id="ranking-connection-status" class="ranking-connection-status" role="status"></p>
+          </section>
+        </div>
       </section>
       <div id="game-screen" hidden>
       <div class="course-heading"><button id="home-button" class="text-button" type="button">← 메인</button><span id="course-count">앨범 확인 중</span></div>
@@ -39,7 +56,7 @@
         <div id="typing-area" class="typing-area"><div class="target-heading"><span class="small-label">따라 입력</span><span id="track-counter" class="track-counter">—</span></div><div id="typing-line" class="typing-line"><div class="target-viewport" aria-hidden="true"><div id="target-text" class="target-text"></div></div><input id="typing-input" class="typing-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="보이는 곡 제목을 그대로 입력하세요" aria-describedby="input-hint" enterkeyhint="done" disabled></div><div class="upcoming"><span class="small-label">다음</span><div id="upcoming-tracks" class="upcoming-tracks">—</div></div><p id="input-hint" class="input-hint">앨범을 불러오고 있어요.</p></div>
         <div class="board-actions"><button id="play-button" class="button primary" type="button" disabled>시작하기</button><button id="restart-button" class="button quiet" type="button" disabled>처음부터</button><span class="key-hint"><kbd>Esc</kbd> 일시정지</span></div>
       </section>
-      <section id="result-panel" class="result-panel" aria-labelledby="result-heading" hidden><span class="eyebrow">CHART JOURNEY COMPLETE</span><h2 id="result-heading">우리의 앨범을 모두 지나왔어요.</h2><p id="result-description" class="result-description"></p><dl class="result-metrics"><div><dt>완주 시간</dt><dd id="result-time">—</dd></div><div><dt>평균 타수</dt><dd id="result-cpm">—</dd></div><div><dt>정확도</dt><dd id="result-accuracy">—</dd></div></dl><p id="best-message" class="best-message"></p><div id="album-memories" class="album-memories" aria-label="완주한 실물 앨범들"></div><div class="result-actions"><button id="replay-button" class="button primary" type="button">다시 시작하기</button><button id="copy-button" class="button quiet" type="button">기록 복사</button></div></section>
+      <section id="result-panel" class="result-panel" aria-labelledby="result-heading" hidden><span class="eyebrow">CHART JOURNEY COMPLETE</span><h2 id="result-heading">앨범 여정을 완주했어요.</h2><p id="result-description" class="result-description"></p><dl class="result-metrics"><div><dt>완주 시간</dt><dd id="result-time">—</dd></div><div><dt>평균 타수</dt><dd id="result-cpm">—</dd></div><div><dt>정확도</dt><dd id="result-accuracy">—</dd></div></dl><p id="best-message" class="best-message"></p><p id="ranking-result-status" class="ranking-result-status" role="status"></p><div id="album-memories" class="album-memories" aria-label="완주한 실물 앨범들"></div><div class="result-actions"><button id="replay-button" class="button primary" type="button">다시 시작하기</button><button id="copy-button" class="button quiet" type="button">기록 복사</button></div></section>
       <div class="below-board"><p id="course-summary">실물 앨범 수록곡 · 발매순</p><p id="best-record"></p></div>
       <p class="play-guide">디지털 싱글·OST·프로젝트 제외. 영문 대소문자는 구분하지 않아요.</p><p id="error-message" class="error-message" role="alert" hidden></p>
       </div>
