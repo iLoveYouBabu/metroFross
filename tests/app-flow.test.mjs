@@ -13,6 +13,8 @@ class Element {
   replaceChildren(...children) { this.text = ''; this.children = children; }
   addEventListener(type, listener) { if (!this.listeners.has(type)) this.listeners.set(type, new Set()); this.listeners.get(type).add(listener); }
   removeEventListener(type, listener) { this.listeners.get(type)?.delete(listener); }
+  cloneNode() { const copy = new Element(this.tagName); for (const key of ['id','value','disabled','readOnly','nodeRegistry']) copy[key] = this[key]; copy.attributes = { ...this.attributes }; return copy; }
+  replaceWith(next) { this.isConnected = false; this.nodeRegistry?.set(this.id,next); next.isConnected = true; this.blur(); }
   emit(type, fields = {}) { const event = { type, target: this, key: '', isComposing: false, preventDefault() { this.defaultPrevented = true; }, ...fields }; for (const listener of [...(this.listeners.get(type) || [])]) listener(event); return event; }
   focus() { document.activeElement = this; }
   blur() { if (document.activeElement === this) document.activeElement = null; }
@@ -29,6 +31,7 @@ test('the main screen boots, partial play stays local, and a full completion alo
   const sales = JSON.parse(await readFile(new URL('../dist/data/first-week-sales.json', import.meta.url), 'utf8'));
   const config = JSON.parse(await readFile(new URL('../dist/data/ranking-config.json', import.meta.url), 'utf8')); config.publishableKey = 'sb_publishable_test_fixture';
   const nodes = new Map([...html.matchAll(/<([a-z0-9]+)[^>]*\bid="([^"]+)"[^>]*>/gu)].map(match => [match[2], Object.assign(new Element(match[1]), { id: match[2], hidden: /\shidden(?:\s|>)/u.test(match[0]), disabled: /\sdisabled(?:\s|>)/u.test(match[0]) })]));
+  for (const node of nodes.values()) node.nodeRegistry = nodes;
   const body = new Element('body'), brand = new Element('a');
   const tabs = ['week', 'all', 'personal'].map(period => { const tab = nodes.get(`records-${period}`); tab.dataset.period = period; return tab; });
   const documentFixture = Object.assign(new Element('document'), { body, documentElement: new Element('html'), hidden: false, activeElement: null, getElementById: id => nodes.get(id) || null, querySelector: selector => selector === '.brand' ? brand : null, querySelectorAll: selector => selector === '.record-tabs [role=tab]' ? tabs : [], createElement: tag => new Element(tag), createElementNS: (_, tag) => new Element(tag), createDocumentFragment: () => new Element('fragment') });
@@ -67,16 +70,34 @@ test('the main screen boots, partial play stays local, and a full completion alo
     const choice = nodes.get('home-albums').querySelectorAll('input').find(input => input.value === 'from-9');
     choice.checked = true; nodes.get('home-albums').emit('change', { target: choice }); assert.match(nodes.get('home-course-count').textContent, /1앨범 · 3곡/u);
     nodes.get('nickname-input').value = '테스트플로버'; nodes.get('start-button').emit('click'); await settle();
+    const countdownInput = nodes.get('typing-input');
+    countdownInput.emit('compositionstart');countdownInput.value='럽밤';countdownInput.emit('input',{isComposing:true});
     assert.equal(nodes.get('countdown-number').textContent, '3'); advance(1000); assert.equal(nodes.get('countdown-number').textContent, '2'); advance(2000);
-    const input = nodes.get('typing-input');
-    for (const track of course.tracks.filter(track => track.albumId === 'from-9')) { advance(1000); input.value = track.title; input.emit('input'); }
+    assert.notEqual(nodes.get('typing-input'),countdownInput);assert.equal(nodes.get('typing-input').value,'');
+    countdownInput.emit('compositionend');countdownInput.emit('input');assert.equal(nodes.get('track-counter').textContent,'1 / 3');
+    for (const track of course.tracks.filter(track => track.albumId === 'from-9')) { advance(1000); const input=nodes.get('typing-input');input.value = track.title; input.emit('input');assert.notEqual(nodes.get('typing-input'),input); }
     await settle(); assert.equal(nodes.get('result-panel').hidden, false); assert.match(nodes.get('ranking-result-status').textContent, /랭킹에는 포함되지/u);
     assert.equal(requests.filter(request => /fromis_nickname_begin|fromis_nickname_finish|\/auth\//u.test(request.url)).length, 0);
     nodes.get('home-button').emit('click'); nodes.get('records-personal').emit('click'); await settle(); assert.match(nodes.get('records-content').textContent, /연습 완주/u);
     nodes.get('nickname-input').value='다른플로버';nodes.get('save-nickname').emit('click');await settle();assert.doesNotMatch(nodes.get('records-content').textContent,/연습 완주/u);
     nodes.get('nickname-input').value='테스트플로버';nodes.get('save-nickname').emit('click');await settle();assert.match(nodes.get('records-content').textContent,/연습 완주/u);
-    backendReady = true; nodes.get('select-all-albums').emit('click'); nodes.get('start-button').emit('click'); await settle(); advance(3000);
-    for (const track of course.tracks) { advance(1000); input.value = track.title; input.emit('input'); }
+    backendReady = true; nodes.get('select-all-albums').emit('click'); nodes.get('start-button').emit('click');
+    const cleanCountdownInput=nodes.get('typing-input');await settle();advance(3000);
+    assert.equal(nodes.get('typing-input'),cleanCountdownInput,'a clean focused input survives countdown to retain the mobile keyboard');
+    for (const track of course.tracks) {
+      advance(1000); const input=nodes.get('typing-input');
+      if (/[가-힣]/u.test(track.title)) {
+        // A browser can deliver the first composing input before compositionstart.
+        input.value=track.title[0];input.emit('input',{isComposing:true,inputType:'insertCompositionText'});
+        assert.equal(nodes.get('typing-input').value,track.title[0]);
+        input.emit('compositionstart');
+      }
+      input.value = track.title; input.emit('input',{isComposing:/[가-힣]/u.test(track.title)});
+      assert.notEqual(nodes.get('typing-input'),input);
+      input.emit('compositionend');input.emit('input');
+      assert.equal(nodes.get('typing-input').value,'');
+      if (track!==course.tracks.at(-1)) assert.equal(documentFixture.activeElement,nodes.get('typing-input'));
+    }
     await settle();
     assert.match(nodes.get('ranking-result-status').textContent, /랭킹에 남겼/u);
     const submissions = requests.filter(request => request.url.endsWith('/fromis_nickname_finish'));

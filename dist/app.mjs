@@ -10,7 +10,7 @@ import { createRankingClient, normalizeNickname } from './ranking-client.mjs';
 
 const byId = id => document.getElementById(id);
 const ui = Object.fromEntries(['album-cover','album-name','album-sales','cpm','accuracy','elapsed','typing-input','target-text','typing-line','input-hint','state-label','track-counter','upcoming-tracks','course-progress','progress-fill','progress-percentage','journey-label','play-button','restart-button','game-board','result-panel','result-description','result-time','result-cpm','result-accuracy','best-message','album-memories','best-record','course-summary','course-count','chart-note','chart-view-label','chart-view-button','error-message','announcement','catalog-dialog','catalog-list','catalog-scope','sales-definition','sources-list','excluded-summary','catalog-updated','restart-dialog'].map(id => [id,byId(id)]));
-const input = ui['typing-input'];
+let input = ui['typing-input'];
 const clock = () => performance.now();
 let safeStorage;try{safeStorage=localStorage;}catch{}
 const personalRecords=createPersonalRecords(safeStorage);
@@ -129,7 +129,13 @@ function render(state) {
   ui['play-button'].textContent=({ready:'시작하기',running:'일시정지',paused:'계속하기'})[state.status];
   ui['play-button'].disabled=phase!=='game';ui['restart-button'].disabled=phase!=='game';
 }
-input.addEventListener('scroll',syncScroll);
+function bindInput(fresh,previous){
+  previous?.removeEventListener('scroll',syncScroll);
+  previous?.removeEventListener('focus',updateViewport);
+  input=fresh;ui['typing-input']=fresh;
+  fresh.addEventListener('scroll',syncScroll);
+  fresh.addEventListener('focus',updateViewport);
+}
 ui['typing-line'].addEventListener('click',focusInput);
 function pause(){if(session?.status==='running'){inputController?.cancel();render(session.pause(clock()));}}
 function resume(){if(session?.status!=='paused'||phase!=='game')return;render(session.resume(clock()));inputController?.flush();focusInput();}
@@ -152,7 +158,7 @@ ui['restart-dialog'].addEventListener('close',()=>{if(restartWasRunning)resume()
 byId('replay-button').addEventListener('click',()=>beginRun());
 function renderBest(){const course=phase==='home'?previewCourse:activeCourse;best=course?bestForCourse(personalRecords.list(),course.signature,deviceCategory(),currentNickname):null;const text=best?`이 코스 개인 최고 ${formatTime(best.elapsedMs,true)}`:'';ui['best-record'].textContent=text;ui['home-best'].textContent=text;recordsPanel?.summary();}
 
-const countdown=createCountdown({onTick:number=>{const digit=document.createElement('span');digit.className='countdown-digit';digit.textContent=String(number);ui['countdown-number'].replaceChildren(digit);},onDone:()=>{if(phase!=='countdown'||document.hidden)return;runContext.onlineEligible=Boolean(runContext.course.isFullCourse&&runContext.ticketReady&&runContext.ticket?.eligible);phase='game';ui['countdown-overlay'].hidden=true;render(session.start(clock()));focusInput();announce('시작! 보이는 제목을 따라 입력해주세요.');}});
+const countdown=createCountdown({onTick:number=>{const digit=document.createElement('span');digit.className='countdown-digit';digit.textContent=String(number);ui['countdown-number'].replaceChildren(digit);},onDone:()=>{if(phase!=='countdown'||document.hidden)return;runContext.onlineEligible=Boolean(runContext.course.isFullCourse&&runContext.ticketReady&&runContext.ticket?.eligible);if(inputController.isComposing()||input.value!=='')inputController.reset();phase='game';ui['countdown-overlay'].hidden=true;render(session.start(clock()));focusInput();announce('시작! 보이는 제목을 따라 입력해주세요.');}});
 function beginRun(){if(!previewCourse)return;let nickname;try{nickname=nicknameValue();}catch(error){nicknameError(error.message);ui['nickname-input'].focus();return;}saveNicknameLocally(nickname);countdown.cancel();inputController?.cancel();phase='countdown';document.body.classList.remove('is-home');ui['home-screen'].hidden=true;ui['game-screen'].hidden=false;prepareCourse(previewCourse);runContext=createRunContext(nickname);reset({focus:false});ui['countdown-overlay'].hidden=false;input.disabled=false;input.readOnly=false;input.focus({preventScroll:true});updateViewport();countdown.start();}
 function showHome({focus=true}={}){countdown.cancel();inputController?.cancel();phase='home';document.body.classList.add('is-home');ui['countdown-overlay'].hidden=true;if(session)reset({focus:false});ui['game-screen'].hidden=true;ui['home-screen'].hidden=false;input.blur();updateViewport();if(courseCatalog)updatePicker();recordsPanel?.refresh();if(focus)ui['start-button'].focus({preventScroll:true});}
 ui['start-button'].addEventListener('click',beginRun);
@@ -218,7 +224,7 @@ async function initialize() {
     const chartAlbums=catalog.albums.map(album=>{const record=records.get(album.id);return{...album,firstWeekSales:record?.sales??null,approximate:Boolean(record?.approximate),salesRecord:record};});
     albums=new Map(chartAlbums.map(album=>[album.id,album]));courseCatalog={...catalog,albums:chartAlbums};fullCourse=buildCourse(courseCatalog);
     prepareCourse(fullCourse);
-    inputController=attachInputController({input,session:()=>session,now:clock,onState:render,onAnnounce:announce,canInput:()=>phase==='game'&&!ui['catalog-dialog'].open&&!ui['restart-dialog'].open});
+    inputController=attachInputController({input,session:()=>session,now:clock,onState:render,onAnnounce:announce,onInputReplaced:bindInput,canInput:()=>phase==='game'&&!ui['catalog-dialog'].open&&!ui['restart-dialog'].open});
     let nickname=readStorage('fromis-player-profile-v1')?.nickname;try{nickname=normalizeNickname(nickname);}catch{nickname=`플로버${Math.floor(Math.random()*9000+1000)}`;}currentNickname=nickname;ui['nickname-input'].value=nickname;writeStorage('fromis-player-profile-v1',{nickname});
     const storedSelection=readStorage('fromis-selected-albums-v1');selectedIds=new Set(Array.isArray(storedSelection)?storedSelection.filter(id=>albums.has(id)):chartAlbums.map(album=>album.id));
     const choices=document.createDocumentFragment();chartAlbums.forEach(album=>{const label=document.createElement('label');label.className='album-choice';label.title=album.title;const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=album.id;checkbox.setAttribute('aria-label',`${album.title} 선택`);const frame=document.createElement('span');frame.className='choice-cover';const image=document.createElement('img');image.src=album.cover;image.alt='';image.width=62;image.height=62;frame.append(image);const title=document.createElement('span');title.className='choice-title';title.textContent=album.title;label.append(checkbox,frame,title);choices.append(label);});ui['home-albums'].replaceChildren(choices);
@@ -236,6 +242,6 @@ async function initialize() {
 function startTick(){if(!tick)tick=setInterval(()=>{if(session?.status==='running')renderMetrics(session.snapshot(clock()));},100);}
 const viewport=window.visualViewport;let largestViewportHeight=viewport?.height||innerHeight,previousViewportWidth=viewport?.width||innerWidth;
 function updateViewport(){const height=viewport?.height||innerHeight,width=viewport?.width||innerWidth;if(Math.abs(width-previousViewportWidth)>80)largestViewportHeight=height;else largestViewportHeight=Math.max(largestViewportHeight,height);previousViewportWidth=width;const keyboardOpen=phase!=='home'&&session?.status!=='completed'&&matchMedia('(pointer:coarse)').matches&&largestViewportHeight-height>120;document.documentElement.style.setProperty('--viewport-height',`${Math.floor(height)}px`);document.documentElement.classList.toggle('keyboard-open',keyboardOpen);}
-viewport?.addEventListener('resize',updateViewport);window.addEventListener('resize',updateViewport);input.addEventListener('focus',updateViewport);updateViewport();
+viewport?.addEventListener('resize',updateViewport);window.addEventListener('resize',updateViewport);bindInput(input);updateViewport();
 window.addEventListener('pagehide',()=>{if(phase==='countdown')showHome({focus:false});inputController?.cancel();if(tick)clearInterval(tick);tick=null;});window.addEventListener('pageshow',()=>{if(session)startTick();});
 initialize();
