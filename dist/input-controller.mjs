@@ -2,7 +2,7 @@ import { normalizeTitle } from './core.mjs';
 
 /** Keep native IME events at the input boundary; the scoring engine sees each committed title once. */
 export function attachInputController({ input, session, now = () => performance.now(), onState = () => {}, onAnnounce = () => {}, canInput = () => true, defer = callback => setTimeout(callback, 0), cancelDefer = clearTimeout }) {
-  let composing = false, timer = null, generation = 0, pending = null, tail = null, destroyed = false;
+  let composing = false, timer = null, focusTimer = null, generation = 0, pending = null, tail = null, destroyed = false, compositionText = '', autoFinishing = false, blockedComposition = false, blockedValue = '';
   const listeners = [];
   const current = () => session();
   const allowed = () => !destroyed && canInput() && ['ready', 'running'].includes(current()?.status);
@@ -12,15 +12,31 @@ export function attachInputController({ input, session, now = () => performance.
     if (!composing && input.value !== state.input) input.value = state.input;
     if (!input.value) input.scrollLeft = 0;
   };
-  const rememberTail = (engine, value, index) => {
-    tail = { engine, value, data: [...value].at(-1) || '', index, until: now() + 300 };
+  const rememberTail = (engine, value, index, blocked = false) => {
+    const lastWord = value.trim().split(/\s+/u).at(-1);
+    const fragments = [...new Set([value, lastWord, compositionText, [...value].at(-1)])].filter(Boolean).sort((a, b) => b.length - a.length);
+    tail = { engine, fragments, index, blocked };
   };
-  const discardTail = value => {
-    if (!tail || tail.engine !== current() || tail.index !== current().index || now() > tail.until) { tail = null; return false; }
-    if (value !== tail.value && value !== tail.data && value !== '') return false;
-    input.value = current().input;
-    input.scrollLeft = 0;
-    return true;
+  const validTail = () => {
+    if (tail && (tail.engine !== current() || tail.index !== current().index)) tail = null;
+    return tail && !composing;
+  };
+  const isNewPrefix = value => {
+    const track = current()?.snapshot(now()).currentTrack;
+    const normalized = normalizeTitle(value);
+    return track && [track.title, ...(track.aliases || [])].some(title => normalizeTitle(title).startsWith(normalized));
+  };
+  const cleanTail = value => {
+    if (!validTail() || !value || (!tail.blocked && isNewPrefix(value))) return value;
+    const live = current().input;
+    // A delayed IME commit may replace the input, prepend its last word, or
+    // arrive behind an English key already accepted for the next title.
+    for (const fragment of tail.fragments) {
+      if (value === fragment) return live;
+      if (value.startsWith(fragment)) return value.slice(fragment.length);
+      if (live && value.startsWith(live + fragment)) return live + value.slice(live.length + fragment.length);
+    }
+    return value;
   };
   const publish = (state, engine, value, wasComposing) => {
     if (state.advanced) {
@@ -39,18 +55,22 @@ export function attachInputController({ input, session, now = () => performance.
     return publish(state, engine, value, wasComposing);
   };
   const focus = () => { if (allowed() && !input.disabled && !input.readOnly && input.isConnected !== false) input.focus({ preventScroll: true }); };
+  const requestFocus = () => {
+    if (focusTimer !== null) cancelDefer(focusTimer);
+    const engine = current(), index = engine.index;
+    focusTimer = defer(() => { focusTimer = null; if (current() === engine && engine.index === index) focus(); });
+  };
   const finishComposition = value => {
     const engine = current(), index = engine.index;
-    clearTimer(); const run = generation;
+    clearTimer(); const run = generation; autoFinishing = true;
     // Blur commits most native IMEs. The fallback covers browsers that omit compositionend.
     timer = defer(() => {
       timer = null;
       if (run !== generation || !allowed() || current() !== engine || engine.index !== index) return;
-      commit(value, false); focus();
+      commit(value, false); autoFinishing = false; requestFocus();
     });
     input.blur();
-    // Refocus in the same user-input event to retain the mobile keyboard where supported.
-    focus();
+    // Refocus after native composition events have had a chance to finish.
   };
   const accept = (value, isComposing) => {
     const state = commit(value, isComposing);
@@ -58,16 +78,24 @@ export function attachInputController({ input, session, now = () => performance.
     return state;
   };
   listen('beforeinput', event => {
-    if (!allowed() || ['insertFromPaste', 'insertFromDrop'].includes(event.inputType)) event.preventDefault();
+    if (!allowed() || blockedComposition || ['insertFromPaste', 'insertFromDrop'].includes(event.inputType)) event.preventDefault();
+    else if (validTail() && typeof event.data === 'string' && tail.fragments.includes(event.data) && !isNewPrefix(event.data)) event.preventDefault();
   });
   listen('compositionstart', () => {
-    if (!allowed()) { composing = false; return; }
-    tail = null; clearTimer(); composing = true;
+    if (!allowed()) { blockedComposition = true; blockedValue = ''; composing = false; return; }
+    blockedComposition = false; blockedValue = ''; tail = null; compositionText = ''; clearTimer(); composing = true;
   });
-  listen('compositionend', () => {
-    const value = input.value;
-    if (discardTail(value)) { composing = false; clearTimer(); return; }
+  listen('compositionupdate', event => { if (typeof event.data !== 'string') return; if (blockedComposition) blockedValue = event.data; else if (composing) compositionText = event.data; });
+  listen('compositionend', event => {
+    if (blockedComposition) {
+      const value = input.value || blockedValue || event.data || '';
+      blockedComposition = false; blockedValue = ''; composing = false; clearTimer();
+      rememberTail(current(), value, current().index, true); input.value = current().input; return;
+    }
+    const rawValue = input.value, value = cleanTail(rawValue);
+    if (value !== rawValue) { input.value = value; if (value === current().input) { composing = false; clearTimer(); return; } }
     const wasComposing = composing || current()?.isComposing;
+    if (wasComposing && typeof event.data === 'string') compositionText = event.data;
     composing = false; clearTimer();
     if (!allowed()) {
       if (current()?.status === 'paused') pending = { engine: current(), index: current().index, value, wasComposing };
@@ -78,15 +106,19 @@ export function attachInputController({ input, session, now = () => performance.
     const engine = current();
     const state = commit(value, false);
     if (state?.advanced && wasComposing) rememberTail(engine, value, state.index);
+    if (autoFinishing) { autoFinishing = false; requestFocus(); }
   });
   listen('input', event => {
-    if (discardTail(input.value)) return;
+    if (blockedComposition) { blockedValue = input.value; input.value = current().input; return; }
+    const rawValue = input.value, value = cleanTail(rawValue);
+    if (value !== rawValue) { input.value = value; if (value === current().input) return; }
     if (!allowed()) { syncValue(current()?.snapshot(now()) || { input: '' }); return; }
     composing = composing || Boolean(event.isComposing);
+    if (composing && typeof event.data === 'string') compositionText = event.data;
     accept(input.value, composing);
   });
   listen('keydown', event => {
-    if (event.key?.length === 1 || event.key === 'Backspace' || event.key === 'Delete') tail = null;
+    if (tail?.blocked && !event.isComposing && (event.key?.length === 1 || event.key === 'Backspace' || event.key === 'Delete')) tail = null;
     if (event.key !== 'Enter') return;
     event.preventDefault();
     if (!event.isComposing && !composing) flush();
@@ -94,8 +126,8 @@ export function attachInputController({ input, session, now = () => performance.
   listen('paste', event => { event.preventDefault(); onAnnounce('곡 제목을 직접 입력해주세요.'); });
   listen('drop', event => event.preventDefault());
 
-  function cancel() { clearTimer(); composing = false; if (current()) syncValue(current().snapshot(now())); }
-  function reset() { cancel(); pending = null; tail = null; }
+  function cancel() { clearTimer(); if (focusTimer !== null) cancelDefer(focusTimer); focusTimer = null; autoFinishing = false; composing = false; if (current()) syncValue(current().snapshot(now())); }
+  function reset() { cancel(); pending = null; tail = null; compositionText = ''; blockedComposition = false; blockedValue = ''; }
   function flush() {
     if (!allowed()) return null;
     if (pending) {
