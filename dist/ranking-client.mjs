@@ -63,7 +63,6 @@ export function createRankingClient(options = {}) {
 
   return {
     configured, courseVersion: options.courseVersion, device, useNickname, getNickname: () => nickname,
-    async setNickname(value) { return rpc('fromis_nickname_set', { p_nickname: useNickname(value) }); },
     async leaderboard({ period = 'week', device: selectedDevice = device, limit = 10, nickname: selected = nickname } = {}) {
       if (!['week','all'].includes(period)) throw new RankingError('invalid-period', '랭킹 기간을 확인해주세요.');
       const result = await rpc('fromis_nickname_leaderboard', { p_course_version: options.courseVersion, p_period: period, p_device: deviceName(selectedDevice), p_limit: Math.min(50, Math.max(1, Number(limit) || 10)), p_nickname: selected ? normalizeNickname(selected) : null });
@@ -73,12 +72,15 @@ export function createRankingClient(options = {}) {
     async personal({ device: selectedDevice = device, nickname: selected = nickname } = {}) { return rpc('fromis_nickname_personal', { p_course_version: options.courseVersion, p_device: deviceName(selectedDevice), p_nickname: selectedNickname(selected) }); },
     async startRun({ albumIds: selected, fullCourse, device: selectedDevice = device, nickname: selectedName = nickname } = {}) {
       if (!fullCourse || !fullSelection(selected)) return { eligible: false, reason: 'practice' };
-      return rpc('fromis_nickname_begin', { p_course_version: options.courseVersion, p_album_ids: selected, p_device: deviceName(selectedDevice), p_nickname: selectedNickname(selectedName) });
+      const result = await rpc('fromis_nickname_begin', { p_course_version: options.courseVersion, p_album_ids: selected, p_device: deviceName(selectedDevice), p_nickname: selectedNickname(selectedName) });
+      if (result?.eligible !== true || typeof result.run_id !== 'string' || !result.run_id.trim()) throw new RankingError('invalid-response', '랭킹 시작 정보를 확인하지 못했어요.');
+      // The pending UUID is the submission capability. Discard legacy token aliases.
+      return { eligible: true, run_id: result.run_id, started_at: result.started_at, course_version: result.course_version, track_count: result.track_count, device: result.device };
     },
-    async finishRun({ runId, runToken, fullCourse, completedTrackCount, elapsedMs, correctStrokes, attemptedStrokes } = {}) {
+    async finishRun({ runId, fullCourse, completedTrackCount, elapsedMs, correctStrokes, attemptedStrokes } = {}) {
       if (!fullCourse) return { eligible: false, reason: 'practice' };
-      if (completedTrackCount !== options.trackCount || !runId || !runToken || !Number.isFinite(elapsedMs) || !Number.isInteger(correctStrokes) || !Number.isInteger(attemptedStrokes) || attemptedStrokes < correctStrokes) throw new RankingError('invalid-run', '완주 기록을 확인하지 못했어요.');
-      return rpc('fromis_nickname_finish', { p_run_id: runId, p_run_token: runToken, p_completed_track_count: completedTrackCount, p_elapsed_ms: Math.round(elapsedMs), p_correct_strokes: correctStrokes, p_attempted_strokes: attemptedStrokes });
+      if (completedTrackCount !== options.trackCount || typeof runId !== 'string' || !runId.trim() || !Number.isFinite(elapsedMs) || Math.round(elapsedMs) <= 0 || elapsedMs > 14400000 || !Number.isSafeInteger(correctStrokes) || correctStrokes <= 0 || !Number.isSafeInteger(attemptedStrokes) || attemptedStrokes < correctStrokes || attemptedStrokes > 100000) throw new RankingError('invalid-run', '완주 기록을 확인하지 못했어요.');
+      return rpc('fromis_nickname_finish', { p_run_id: runId, p_completed_track_count: completedTrackCount, p_elapsed_ms: Math.round(elapsedMs), p_correct_strokes: correctStrokes, p_attempted_strokes: attemptedStrokes });
     }
   };
 }

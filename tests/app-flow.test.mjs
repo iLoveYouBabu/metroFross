@@ -51,8 +51,8 @@ test('the main screen boots, partial play stays local, and a full completion alo
     if (url.includes('/auth/')) throw new Error('Nickname mode must not call Supabase Auth');
     if (!backendReady) return result({ code: 'PGRST202' }, false);
     if (url.endsWith('/fromis_nickname_leaderboard')) return result([]);
-    if (url.endsWith('/fromis_nickname_set')) return result({ nickname: body.p_nickname });
-    if (url.endsWith('/fromis_nickname_begin')) return result({ eligible: true, run_id: 'fixture-run',run_token:'fixture-proof' });
+    if (url.endsWith('/fromis_nickname_set')) throw new Error('Nickname profile writes have been removed');
+    if (url.endsWith('/fromis_nickname_begin')) return result({ eligible: true, run_id: 'fixture-run' });
     if (url.endsWith('/fromis_nickname_finish')) return result({ eligible: true, record: { run_id: 'fixture-run' } });
     if (url.endsWith('/fromis_nickname_personal')) return result({ best: null, recent: [] });
     throw new Error('Unexpected fixture request');
@@ -88,8 +88,8 @@ test('the main screen boots, partial play stays local, and a full completion alo
     await settle(); assert.equal(nodes.get('result-panel').hidden, false); assert.match(nodes.get('ranking-result-status').textContent, /랭킹에는 포함되지/u);
     assert.equal(requests.filter(request => /fromis_nickname_begin|fromis_nickname_finish|\/auth\//u.test(request.url)).length, 0);
     nodes.get('home-button').emit('click'); nodes.get('records-personal').emit('click'); await settle(); assert.match(nodes.get('records-content').textContent, /연습 완주/u);
-    nodes.get('nickname-input').value='ㄷㄹㅂ';nodes.get('save-nickname').emit('click');await settle();assert.doesNotMatch(nodes.get('records-content').textContent,/연습 완주/u);
-    nodes.get('nickname-input').value='ㅌㅅㅌ123';nodes.get('save-nickname').emit('click');await settle();assert.match(nodes.get('records-content').textContent,/연습 완주/u);
+    nodes.get('nickname-input').value='ㄷㄹㅂ';nodes.get('nickname-input').emit('blur');await settle();assert.doesNotMatch(nodes.get('records-content').textContent,/연습 완주/u);
+    nodes.get('nickname-input').value='ㅌㅅㅌ123';nodes.get('nickname-input').emit('change');await settle();assert.match(nodes.get('records-content').textContent,/연습 완주/u);
     backendReady = true; nodes.get('select-all-albums').emit('click'); nodes.get('start-button').emit('click');
     const cleanCountdownInput=nodes.get('typing-input');await settle();advance(3000);
     assert.equal(nodes.get('typing-input'),cleanCountdownInput,'a clean focused input survives countdown to retain the mobile keyboard');
@@ -111,7 +111,9 @@ test('the main screen boots, partial play stays local, and a full completion alo
     assert.match(nodes.get('ranking-result-status').textContent, /랭킹에 남겼/u);
     const submissions = requests.filter(request => request.url.endsWith('/fromis_nickname_finish'));
     assert.equal(submissions.length, 1); assert.equal(submissions[0].body.p_completed_track_count, 67);
-    assert.equal(submissions[0].body.p_run_token,'fixture-proof');
+    assert.equal(submissions[0].body.p_run_token,undefined);
+    assert.equal(requests.filter(request=>request.url.endsWith('/fromis_nickname_set')).length,0);
+    assert.equal(nodes.has('save-nickname'),false);
     assert.equal(requests.filter(request => request.url.endsWith('/fromis_nickname_begin')).length, 1);
     assert.equal(requests.filter(request => request.url.includes('/auth/')).length,0);
     const records = JSON.parse(storage.getItem('fromis-personal-records-v1')); assert.equal(records.length, 2); assert.equal(records.filter(record => record.isFullCourse).length, 1);

@@ -39,11 +39,11 @@ test('leaderboard passes the current nickname only for highlighting actual recor
   assert.equal(f.calls[0].body.p_period,'all');assert.equal(f.calls[0].body.p_device,'mobile');assert.equal(f.calls[0].body.p_nickname,'ㅍㄹㅂ');
 });
 
-test('nickname save uses one public RPC and never requests Auth or writes session storage',async()=>{
-  const f=fixture([reply({nickname:'ㅍㄹㅂ1!'})]);
-  assert.deepEqual(await f.client.setNickname(' ㅍㄹㅂ1! '),{nickname:'ㅍㄹㅂ1!'});
-  assert.equal(f.calls.length,1);assert.match(f.calls[0].url,/\/rpc\/fromis_nickname_set$/u);
-  assert.deepEqual(f.calls[0].body,{p_nickname:'ㅍㄹㅂ1!'});
+test('nickname selection stays local without registering a profile or creating an Auth session',()=>{
+  const f=fixture();
+  assert.equal(f.client.setNickname,undefined);
+  assert.equal(f.client.useNickname(' ㅍㄹㅂ1! '),'ㅍㄹㅂ1!');
+  assert.equal(f.calls.length,0);
   assert.equal(f.client.getNickname(),'ㅍㄹㅂ1!');assert.deepEqual(f.storageCalls,[]);
 });
 
@@ -64,23 +64,34 @@ test('personal records can be looked up by an explicitly supplied nickname with 
   await assert.rejects(empty.client.personal(),{code:'nickname-required'});assert.equal(empty.calls.length,0);
 });
 
-test('full-course tickets carry the private finish token into only the finish request',async()=>{
-  const runId='00000000-0000-4000-8000-000000000001',runToken='00000000-0000-4000-8000-000000000002';
-  const f=fixture([reply({eligible:true,run_id:runId,run_token:runToken}),reply({eligible:true,duplicate:false,record:{run_id:runId,nickname:'ㅍㄹㅂ',elapsed_ms:54321}})]);
-  const run=await f.client.startRun({albumIds:['a','b'],fullCourse:true});assert.equal(run.run_token,runToken);
+test('full-course completion uses the pending run ID and discards any legacy token alias',async()=>{
+  const runId='00000000-0000-4000-8000-000000000001';
+  const f=fixture([reply({eligible:true,run_id:runId,run_token:runId}),reply({eligible:true,duplicate:false,record:{run_id:runId,nickname:'ㅍㄹㅂ',elapsed_ms:54321}})]);
+  const run=await f.client.startRun({albumIds:['a','b'],fullCourse:true});assert.equal(run.run_id,runId);assert.equal(run.run_token,undefined);
   assert.equal(f.calls[0].body.p_nickname,'ㅍㄹㅂ');
-  const result=await f.client.finishRun({runId,runToken,fullCourse:true,completedTrackCount:3,elapsedMs:54321.2,correctStrokes:654,attemptedStrokes:660});
-  assert.equal(f.calls[1].body.p_elapsed_ms,54321);assert.equal(f.calls[1].body.p_run_id,runId);assert.equal(f.calls[1].body.p_run_token,runToken);
+  const result=await f.client.finishRun({runId,fullCourse:true,completedTrackCount:3,elapsedMs:54321.2,correctStrokes:654,attemptedStrokes:660});
+  assert.deepEqual(f.calls[1].body,{p_run_id:runId,p_completed_track_count:3,p_elapsed_ms:54321,p_correct_strokes:654,p_attempted_strokes:660});
   assert.equal(result.record.run_token,undefined);assert.equal(result.record.finish_token,undefined);
 });
 
-test('finish requires the issued token, complete count and consistent counters',async()=>{
+test('finish requires the pending ID, complete count, bounded active time and consistent counters',async()=>{
   const f=fixture();
-  const common={runId:'id',runToken:'token',fullCourse:true,completedTrackCount:3,elapsedMs:100,correctStrokes:50,attemptedStrokes:60};
-  await assert.rejects(f.client.finishRun({...common,runToken:null}),{code:'invalid-run'});
+  const common={runId:'id',fullCourse:true,completedTrackCount:3,elapsedMs:100,correctStrokes:50,attemptedStrokes:60};
+  for(const runId of [null,'',{},' '])await assert.rejects(f.client.finishRun({...common,runId}),{code:'invalid-run'});
   await assert.rejects(f.client.finishRun({...common,completedTrackCount:2}),{code:'invalid-run'});
-  await assert.rejects(f.client.finishRun({...common,attemptedStrokes:40}),{code:'invalid-run'});
+  for(const elapsedMs of [NaN,Infinity,-1,0,14400001])await assert.rejects(f.client.finishRun({...common,elapsedMs}),{code:'invalid-run'});
+  for(const stats of [{attemptedStrokes:40},{correctStrokes:0},{correctStrokes:1.5},{attemptedStrokes:Infinity},{attemptedStrokes:100001}])await assert.rejects(f.client.finishRun({...common,...stats}),{code:'invalid-run'});
   assert.equal(f.calls.length,0);
+});
+
+test('a full-course start accepts an ID without a token and rejects missing pending IDs',async()=>{
+  const f=fixture([reply({eligible:true,run_id:'pending-id'})]);
+  const ticket=await f.client.startRun({albumIds:['a','b'],fullCourse:true});
+  assert.equal(ticket.run_id,'pending-id');assert.equal(ticket.run_token,undefined);
+  for(const response of [{eligible:true},{eligible:true,run_id:''},{eligible:true,run_id:0},null]){
+    const invalid=fixture([reply(response)]);
+    await assert.rejects(invalid.client.startRun({albumIds:['a','b'],fullCourse:true}),{code:'invalid-response'});
+  }
 });
 
 test('unconfigured or privileged keys cannot make network calls',async()=>{
@@ -94,7 +105,7 @@ test('unconfigured or privileged keys cannot make network calls',async()=>{
 test('network and invalid server tickets remain explicit errors',async()=>{
   await assert.rejects(fixture([new TypeError('offline')]).client.leaderboard(),{code:'network'});
   const f=fixture([reply({code:'P0001',message:'INVALID_RUN'},400)]);
-  await assert.rejects(f.client.finishRun({runId:'id',runToken:'token',fullCourse:true,completedTrackCount:3,elapsedMs:20000,correctStrokes:654,attemptedStrokes:654}),{code:'invalid-run'});
+  await assert.rejects(f.client.finishRun({runId:'id',fullCourse:true,completedTrackCount:3,elapsedMs:20000,correctStrokes:654,attemptedStrokes:654}),{code:'invalid-run'});
 });
 
 test('nicknames accept only kkobak initials, ASCII digits and symbols, from one to six characters',()=>{
@@ -112,13 +123,13 @@ test('nicknames accept only kkobak initials, ASCII digits and symbols, from one 
 test('invalid nicknames never reach nickname or ranking RPCs',async()=>{
   for(const nickname of ['완성형','English','ㄱ 1','ㄱ'.repeat(7),'ㅏ']){
     const f=fixture();
-    await assert.rejects(f.client.setNickname(nickname),{code:'invalid-nickname'});
+    assert.throws(()=>f.client.useNickname(nickname),{code:'invalid-nickname'});
     await assert.rejects(f.client.startRun({albumIds:['a','b'],fullCourse:true,nickname}),{code:'invalid-nickname'});
     await assert.rejects(f.client.personal({nickname}),{code:'invalid-nickname'});
     await assert.rejects(f.client.leaderboard({nickname}),{code:'invalid-nickname'});
     assert.equal(f.calls.length,0);
   }
-  const f=fixture([reply({nickname:'ㄱ'})]);assert.deepEqual(await f.client.setNickname('ㄱ'),{nickname:'ㄱ'});
+  const f=fixture();assert.equal(f.client.useNickname('ㄱ'),'ㄱ');assert.equal(f.calls.length,0);
 });
 
 test('nickname ranking version isolates the old Auth version and matches the complete catalog',async()=>{

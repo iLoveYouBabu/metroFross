@@ -29,8 +29,15 @@ function uniqueId(){return crypto.randomUUID?.()||`${Date.now()}-${Math.random()
 function nicknameError(text){ui['nickname-status'].textContent=text;ui['nickname-status'].classList.toggle('has-error',Boolean(text));ui['nickname-input'].setAttribute('aria-invalid',String(Boolean(text)));}
 function nicknameValue(){return normalizeNickname(ui['nickname-input'].value);}
 function saveNicknameLocally(value){currentNickname=value;writeStorage('fromis-player-profile-v1',{nickname:value});rankingClient.useNickname?.(value);ui['nickname-input'].value=value;nicknameError('');ui['nickname-status'].textContent='같은 닉네임의 기록은 하나로 묶여요.';}
-byId('save-nickname').addEventListener('click',async()=>{let nickname;try{nickname=nicknameValue();}catch(error){nicknameError(error.message);return;}saveNicknameLocally(nickname);renderBest();recordsPanel?.refresh();const button=byId('save-nickname');button.disabled=true;try{await rankingClient.setNickname(nickname);ui['nickname-status'].textContent='닉네임을 저장했어요.';recordsPanel?.refresh();}catch{ui['nickname-status'].textContent='이 기기에 저장했어요. 온라인 연결은 준비 중이에요.';}finally{button.disabled=false;}});
 ui['nickname-input'].addEventListener('input',()=>nicknameError(''));
+function rememberEditedNickname(){
+  if(phase!=='home')return;
+  let nickname;try{nickname=nicknameValue();}catch(error){nicknameError(error.message);return;}
+  const changed=nickname!==currentNickname;saveNicknameLocally(nickname);
+  if(changed){renderBest();recordsPanel?.refresh();}
+}
+ui['nickname-input'].addEventListener('change',rememberEditedNickname);
+ui['nickname-input'].addEventListener('blur',rememberEditedNickname);
 function updatePicker(){
   for(const checkbox of ui['home-albums'].querySelectorAll('input'))checkbox.checked=selectedIds.has(checkbox.value);
   try{previewCourse=buildCourse(courseCatalog,[...selectedIds]);}catch{previewCourse=null;}
@@ -53,7 +60,7 @@ function prepareCourse(course){
 function createRunContext(nickname){
   const context={id:uniqueId(),course:activeCourse,nickname,device:deviceCategory(),client:rankingClient};
   context.onlineEligible=false;context.ticketReady=false;
-  context.rankingStart=(context.course.isFullCourse&&context.client.configured?(async()=>{await context.client.setNickname(nickname);return context.client.startRun({albumIds:context.course.albumIds,fullCourse:true,device:context.device});})().catch(error=>({error})):Promise.resolve({eligible:false,reason:context.course.isFullCourse?'not-configured':'practice'})).then(ticket=>{context.ticket=ticket;context.ticketReady=true;return ticket;});
+  context.rankingStart=(context.course.isFullCourse&&context.client.configured?context.client.startRun({albumIds:context.course.albumIds,fullCourse:true,device:context.device,nickname}).catch(error=>({error})):Promise.resolve({eligible:false,reason:context.course.isFullCourse?'not-configured':'practice'})).then(ticket=>{context.ticket=ticket;context.ticketReady=true;return ticket;});
   return context;
 }
 function formatTime(milliseconds, precise = false) {
@@ -183,7 +190,7 @@ async function saveCompletionRanking(record,state,context){
   if(!context.course.isFullCourse){show('선택 앨범 연습 기록은 개인 기록에 저장했어요. 주간·전체 랭킹에는 포함되지 않아요.');return;}
   if(!context.onlineEligible){show('온라인 랭킹 연결을 완료하지 못했어요. 개인 기록은 이 기기에 저장했어요.');return;}
   show('전체 코스 기록을 랭킹에 저장하고 있어요.');
-  try{const result=await context.client.finishRun({runId:context.ticket.run_id,runToken:context.ticket.run_token,fullCourse:context.course.isFullCourse,completedTrackCount:state.progress.completed,elapsedMs:record.elapsedMs,correctStrokes:state.stats.correctStrokes,attemptedStrokes:state.stats.attemptedStrokes});if(result.eligible){personalRecords.uploaded(record.id,context.ticket.run_id);show('전체 코스 기록을 주간·전체 랭킹에 남겼어요.');if(phase==='home')recordsPanel?.refresh();}else show('이 기록은 개인 기록에만 저장했어요.');}catch{show('온라인 랭킹에 저장하지 못했어요. 개인 기록은 이 기기에 저장했어요.');}
+  try{const result=await context.client.finishRun({runId:context.ticket.run_id,fullCourse:context.course.isFullCourse,completedTrackCount:state.progress.completed,elapsedMs:record.elapsedMs,correctStrokes:state.stats.correctStrokes,attemptedStrokes:state.stats.attemptedStrokes});if(result.eligible){personalRecords.uploaded(record.id,context.ticket.run_id);show('전체 코스 기록을 주간·전체 랭킹에 남겼어요.');if(phase==='home')recordsPanel?.refresh();}else show('이 기록은 개인 기록에만 저장했어요.');}catch{show('온라인 랭킹에 저장하지 못했어요. 개인 기록은 이 기기에 저장했어요.');}
 }
 byId('copy-button').addEventListener('click',async()=>{
   if(!lastResult)return;const text=`fromis_9 chart journey\n${lastResult.albumIds.length}앨범 · ${lastResult.trackCount}곡 ${lastResult.isFullCourse?'전체 완주':'연습 완주'} · ${formatTime(lastResult.elapsedMs,true)}\n${lastResult.cpm}타 · 정확도 ${lastResult.accuracy}%\n${location.href.split('?')[0]}`;
