@@ -225,7 +225,11 @@ async function initialize() {
     albums=new Map(chartAlbums.map(album=>[album.id,album]));courseCatalog={...catalog,albums:chartAlbums};fullCourse=buildCourse(courseCatalog);
     prepareCourse(fullCourse);
     inputController=attachInputController({input,session:()=>session,now:clock,onState:render,onAnnounce:announce,onInputReplaced:bindInput,canInput:()=>phase==='game'&&!ui['catalog-dialog'].open&&!ui['restart-dialog'].open});
-    let nickname=readStorage('fromis-player-profile-v1')?.nickname;try{nickname=normalizeNickname(nickname);}catch{nickname=`플로버${Math.floor(Math.random()*9000+1000)}`;}currentNickname=nickname;ui['nickname-input'].value=nickname;writeStorage('fromis-player-profile-v1',{nickname});
+    const storedNickname=readStorage('fromis-player-profile-v1')?.nickname;
+    let nickname='';
+    try{nickname=normalizeNickname(storedNickname??`ㅍㄹㅂ${Math.floor(Math.random()*900+100)}`);}catch{nicknameError('닉네임 규칙이 바뀌었어요. 초성·숫자·특수기호 1~6글자로 다시 입력해주세요.');}
+    currentNickname=nickname;ui['nickname-input'].value=nickname;
+    if(nickname)writeStorage('fromis-player-profile-v1',{nickname});
     const storedSelection=readStorage('fromis-selected-albums-v1');selectedIds=new Set(Array.isArray(storedSelection)?storedSelection.filter(id=>albums.has(id)):chartAlbums.map(album=>album.id));
     const choices=document.createDocumentFragment();chartAlbums.forEach(album=>{const label=document.createElement('label');label.className='album-choice';label.title=album.title;const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=album.id;checkbox.setAttribute('aria-label',`${album.title} 선택`);const frame=document.createElement('span');frame.className='choice-cover';const image=document.createElement('img');image.src=album.cover;image.alt='';image.width=62;image.height=62;frame.append(image);const title=document.createElement('span');title.className='choice-title';title.textContent=album.title;label.append(checkbox,frame,title);choices.append(label);});ui['home-albums'].replaceChildren(choices);
     try{const response=await fetch('./data/ranking-config.json');if(response.ok)rankingConfig=await response.json();}catch{}

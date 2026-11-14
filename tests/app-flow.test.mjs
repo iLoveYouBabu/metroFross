@@ -36,6 +36,7 @@ test('the main screen boots, partial play stays local, and a full completion alo
   const tabs = ['week', 'all', 'personal'].map(period => { const tab = nodes.get(`records-${period}`); tab.dataset.period = period; return tab; });
   const documentFixture = Object.assign(new Element('document'), { body, documentElement: new Element('html'), hidden: false, activeElement: null, getElementById: id => nodes.get(id) || null, querySelector: selector => selector === '.brand' ? brand : null, querySelectorAll: selector => selector === '.record-tabs [role=tab]' ? tabs : [], createElement: tag => new Element(tag), createElementNS: (_, tag) => new Element(tag), createDocumentFragment: () => new Element('fragment') });
   const saved = new Map(), storage = { getItem: key => saved.get(key) ?? null, setItem: (key, value) => saved.set(key, value), removeItem: key => saved.delete(key) };
+  saved.set('fromis-player-profile-v1',JSON.stringify({nickname:'예전닉네임'}));
   let now = 0, timerId = 0, backendReady = false;
   const timers = new Map(), requests = [];
   const schedule = (callback, delay = 0) => { timers.set(++timerId, { callback, at: now + delay }); return timerId; };
@@ -65,11 +66,19 @@ test('the main screen boots, partial play stays local, and a full completion alo
     for (let attempt = 0; attempt < 20 && nodes.get('start-button').disabled; attempt++) { await new Promise(resolve => setImmediate(resolve)); await settle(); }
     assert.equal(nodes.get('load-error').hidden, true, nodes.get('load-error').textContent);
     assert.equal(nodes.get('home-screen').hidden, false); assert.equal(nodes.get('start-button').disabled, false);
+    assert.equal(nodes.get('nickname-input').value,'');assert.match(nodes.get('nickname-status').textContent,/규칙이 바뀌었/u);
+    assert.equal(JSON.parse(saved.get('fromis-player-profile-v1')).nickname,'예전닉네임','old profile is never renamed or deleted automatically');
     assert.match(nodes.get('records-content').textContent, /준비/u);
     nodes.get('clear-albums').emit('click'); assert.equal(nodes.get('start-button').disabled, true);
     const choice = nodes.get('home-albums').querySelectorAll('input').find(input => input.value === 'from-9');
     choice.checked = true; nodes.get('home-albums').emit('change', { target: choice }); assert.match(nodes.get('home-course-count').textContent, /1앨범 · 3곡/u);
-    nodes.get('nickname-input').value = '테스트플로버'; nodes.get('start-button').emit('click'); await settle();
+    for(const nickname of ['한글','English','1234567','ㅏ']){
+      nodes.get('nickname-input').value=nickname;nodes.get('start-button').emit('click');await settle();
+      assert.equal(nodes.get('home-screen').hidden,false);assert.equal(nodes.get('countdown-overlay').hidden,true);
+      assert.match(nodes.get('nickname-status').textContent,/1~6글자/u);
+      assert.equal(requests.filter(request=>/fromis_nickname_set|fromis_nickname_begin/u.test(request.url)).length,0);
+    }
+    nodes.get('nickname-input').value = 'ㅌㅅㅌ123'; nodes.get('start-button').emit('click'); await settle();
     const countdownInput = nodes.get('typing-input');
     countdownInput.emit('compositionstart');countdownInput.value='럽밤';countdownInput.emit('input',{isComposing:true});
     assert.equal(nodes.get('countdown-number').textContent, '3'); advance(1000); assert.equal(nodes.get('countdown-number').textContent, '2'); advance(2000);
@@ -79,8 +88,8 @@ test('the main screen boots, partial play stays local, and a full completion alo
     await settle(); assert.equal(nodes.get('result-panel').hidden, false); assert.match(nodes.get('ranking-result-status').textContent, /랭킹에는 포함되지/u);
     assert.equal(requests.filter(request => /fromis_nickname_begin|fromis_nickname_finish|\/auth\//u.test(request.url)).length, 0);
     nodes.get('home-button').emit('click'); nodes.get('records-personal').emit('click'); await settle(); assert.match(nodes.get('records-content').textContent, /연습 완주/u);
-    nodes.get('nickname-input').value='다른플로버';nodes.get('save-nickname').emit('click');await settle();assert.doesNotMatch(nodes.get('records-content').textContent,/연습 완주/u);
-    nodes.get('nickname-input').value='테스트플로버';nodes.get('save-nickname').emit('click');await settle();assert.match(nodes.get('records-content').textContent,/연습 완주/u);
+    nodes.get('nickname-input').value='ㄷㄹㅂ';nodes.get('save-nickname').emit('click');await settle();assert.doesNotMatch(nodes.get('records-content').textContent,/연습 완주/u);
+    nodes.get('nickname-input').value='ㅌㅅㅌ123';nodes.get('save-nickname').emit('click');await settle();assert.match(nodes.get('records-content').textContent,/연습 완주/u);
     backendReady = true; nodes.get('select-all-albums').emit('click'); nodes.get('start-button').emit('click');
     const cleanCountdownInput=nodes.get('typing-input');await settle();advance(3000);
     assert.equal(nodes.get('typing-input'),cleanCountdownInput,'a clean focused input survives countdown to retain the mobile keyboard');

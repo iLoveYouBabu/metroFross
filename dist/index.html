@@ -24,7 +24,7 @@
         <div class="home-grid">
           <section class="setup-panel" aria-labelledby="setup-heading">
             <h3 id="setup-heading" class="panel-heading">오늘의 앨범 여정</h3>
-            <label class="field-label" for="nickname-input">닉네임</label><div class="nickname-row"><input id="nickname-input" type="text" maxlength="32" autocomplete="nickname" placeholder="2~16글자" aria-describedby="nickname-status"><button id="save-nickname" class="button quiet" type="button">저장</button></div><p id="nickname-status" class="field-status" role="status">같은 닉네임의 기록은 하나로 묶여요.</p>
+            <label class="field-label" for="nickname-input">닉네임</label><div class="nickname-row"><input id="nickname-input" type="text" minlength="1" maxlength="6" autocomplete="nickname" placeholder="예: ㅍㄹㅂ123" aria-describedby="nickname-rule nickname-status"><button id="save-nickname" class="button quiet" type="button">저장</button></div><p id="nickname-rule" class="field-status">초성·숫자·키보드 특수기호만 · 1~6글자</p><p id="nickname-status" class="field-status" role="status">같은 닉네임의 기록은 하나로 묶여요.</p>
             <div class="album-picker-heading"><span class="field-label">플레이할 앨범</span><div><button id="select-all-albums" class="text-button" type="button">전체 선택</button><button id="clear-albums" class="text-button" type="button">선택 해제</button></div></div>
             <div id="home-albums" class="home-albums" role="group" aria-label="플레이할 앨범 선택"></div>
             <div class="home-course"><span id="home-course-count">앨범 확인 중</span><strong id="course-mode-badge" class="course-mode-badge">전체 코스</strong></div>

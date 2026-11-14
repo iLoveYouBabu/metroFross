@@ -2,9 +2,13 @@ export class RankingError extends Error {
   constructor(code, message) { super(message); this.name = 'RankingError'; this.code = code; }
 }
 
+// Same characters as kkobakGame; only the length limit is different.
+export const NICKNAME_PATTERN = /^[ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎᄀ-ᄒ\x21-\x40\x5b-\x60\x7b-\x7e]{1,6}$/u;
+export const NICKNAME_RULE = '닉네임은 초성·숫자·키보드 특수기호만 1~6글자로 입력해주세요.';
+
 export function normalizeNickname(value) {
-  const nickname = String(value ?? '').normalize('NFC').trim().replace(/\s+/gu, ' ');
-  if ([...nickname].length < 2 || [...nickname].length > 16 || /[\u0000-\u001f\u007f<>]/u.test(nickname)) throw new RankingError('invalid-nickname', '닉네임은 2~16자로 입력해주세요.');
+  const nickname = String(value ?? '').normalize('NFC').trim();
+  if (!NICKNAME_PATTERN.test(nickname)) throw new RankingError('invalid-nickname', NICKNAME_RULE);
   return nickname;
 }
 
@@ -49,7 +53,8 @@ export function createRankingClient(options = {}) {
     const code = payload?.code || '';
     const detail = String(payload?.message || payload?.msg || payload?.error_description || payload?.error || '');
     if (['PGRST202','42P01','42883'].includes(code)) throw new RankingError('backend-not-ready', '온라인 랭킹 설정을 마무리하고 있어요.');
-    if (/NICKNAME_REQUIRED|INVALID_NICKNAME/u.test(detail)) throw new RankingError('nickname-required', '닉네임을 확인해주세요.');
+    if (/INVALID_NICKNAME/u.test(detail)) throw new RankingError('invalid-nickname', NICKNAME_RULE);
+    if (/NICKNAME_REQUIRED/u.test(detail)) throw new RankingError('nickname-required', '닉네임을 먼저 입력해주세요.');
     if (/FULL_COURSE_REQUIRED|COURSE_NOT_FOUND/u.test(detail)) throw new RankingError('course-mismatch', '전체 앨범 코스에서만 랭킹에 등록할 수 있어요.');
     if (/INVALID_RUN|INVALID_STATS|RUN_EXPIRED/u.test(detail) || code === '22P02') throw new RankingError('invalid-run', '기록의 코스나 시간을 확인하지 못했어요.');
     throw new RankingError('server', '랭킹 요청을 처리하지 못했어요. 잠시 후 다시 시도해주세요.');

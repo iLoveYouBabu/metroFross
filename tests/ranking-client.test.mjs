@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { createRankingClient, normalizeNickname } from '../dist/ranking-client.mjs';
 
-const base = { enabled:true, url:'https://test-project.supabase.co', publishableKey:'sb_publishable_test', courseVersion:'test-course', canonicalAlbumIds:['a','b'], trackCount:3, device:'pc', nickname:'플로버' };
+const base = { enabled:true, url:'https://test-project.supabase.co', publishableKey:'sb_publishable_test', courseVersion:'test-course', canonicalAlbumIds:['a','b'], trackCount:3, device:'pc', nickname:'ㅍㄹㅂ' };
 const reply = (data,status=200) => ({ok:status>=200&&status<300,status,json:async()=>data});
 function fixture(responses=[],extra={}) {
   const calls=[],storageCalls=[];
@@ -33,32 +33,32 @@ test('missing nickname SQL is an explicit setup error, not an empty leaderboard'
 });
 
 test('leaderboard passes the current nickname only for highlighting actual records',async()=>{
-  const rows=[{rank:1,nickname:'플로버',elapsed_ms:123456,cpm:350,accuracy:99,is_me:true}];
+  const rows=[{rank:1,nickname:'ㅍㄹㅂ',elapsed_ms:123456,cpm:350,accuracy:99,is_me:true}];
   const f=fixture([reply(rows)]);
   assert.deepEqual(await f.client.leaderboard({period:'all',device:'mobile'}),rows);
-  assert.equal(f.calls[0].body.p_period,'all');assert.equal(f.calls[0].body.p_device,'mobile');assert.equal(f.calls[0].body.p_nickname,'플로버');
+  assert.equal(f.calls[0].body.p_period,'all');assert.equal(f.calls[0].body.p_device,'mobile');assert.equal(f.calls[0].body.p_nickname,'ㅍㄹㅂ');
 });
 
 test('nickname save uses one public RPC and never requests Auth or writes session storage',async()=>{
-  const f=fixture([reply({nickname:'우리 플로버'})]);
-  assert.deepEqual(await f.client.setNickname(' 우리   플로버 '),{nickname:'우리 플로버'});
+  const f=fixture([reply({nickname:'ㅍㄹㅂ1!'})]);
+  assert.deepEqual(await f.client.setNickname(' ㅍㄹㅂ1! '),{nickname:'ㅍㄹㅂ1!'});
   assert.equal(f.calls.length,1);assert.match(f.calls[0].url,/\/rpc\/fromis_nickname_set$/u);
-  assert.deepEqual(f.calls[0].body,{p_nickname:'우리 플로버'});
-  assert.equal(f.client.getNickname(),'우리 플로버');assert.deepEqual(f.storageCalls,[]);
+  assert.deepEqual(f.calls[0].body,{p_nickname:'ㅍㄹㅂ1!'});
+  assert.equal(f.client.getNickname(),'ㅍㄹㅂ1!');assert.deepEqual(f.storageCalls,[]);
 });
 
 test('local nickname selection changes the personal lookup without any profile write',async()=>{
-  const result={nickname:'다른 플로버',best:null,weekBest:null,completedRuns:0,recent:[]};
+  const result={nickname:'ㄷㄹㅂ',best:null,weekBest:null,completedRuns:0,recent:[]};
   const f=fixture([reply(result)]);
-  assert.equal(f.client.useNickname('다른 플로버'),'다른 플로버');assert.equal(f.calls.length,0);
+  assert.equal(f.client.useNickname('ㄷㄹㅂ'),'ㄷㄹㅂ');assert.equal(f.calls.length,0);
   assert.deepEqual(await f.client.personal(),result);
-  assert.match(f.calls[0].url,/\/rpc\/fromis_nickname_personal$/u);assert.equal(f.calls[0].body.p_nickname,'다른 플로버');
+  assert.match(f.calls[0].url,/\/rpc\/fromis_nickname_personal$/u);assert.equal(f.calls[0].body.p_nickname,'ㄷㄹㅂ');
 });
 
 test('personal records can be looked up by an explicitly supplied nickname with no login',async()=>{
-  const result={nickname:'같은 닉네임',best:{elapsed_ms:123456},weekBest:null,completedRuns:1,recent:[]};
+  const result={nickname:'ㄱㅇㄴ',best:{elapsed_ms:123456},weekBest:null,completedRuns:1,recent:[]};
   const f=fixture([reply(result)]);
-  assert.deepEqual(await f.client.personal({nickname:'같은 닉네임'}),result);
+  assert.deepEqual(await f.client.personal({nickname:'ㄱㅇㄴ'}),result);
   assert.equal(f.calls.length,1);assert.equal(f.calls[0].options.headers.Authorization,undefined);assert.deepEqual(f.storageCalls,[]);
   const empty=fixture([],{nickname:''});
   await assert.rejects(empty.client.personal(),{code:'nickname-required'});assert.equal(empty.calls.length,0);
@@ -66,9 +66,9 @@ test('personal records can be looked up by an explicitly supplied nickname with 
 
 test('full-course tickets carry the private finish token into only the finish request',async()=>{
   const runId='00000000-0000-4000-8000-000000000001',runToken='00000000-0000-4000-8000-000000000002';
-  const f=fixture([reply({eligible:true,run_id:runId,run_token:runToken}),reply({eligible:true,duplicate:false,record:{run_id:runId,nickname:'플로버',elapsed_ms:54321}})]);
+  const f=fixture([reply({eligible:true,run_id:runId,run_token:runToken}),reply({eligible:true,duplicate:false,record:{run_id:runId,nickname:'ㅍㄹㅂ',elapsed_ms:54321}})]);
   const run=await f.client.startRun({albumIds:['a','b'],fullCourse:true});assert.equal(run.run_token,runToken);
-  assert.equal(f.calls[0].body.p_nickname,'플로버');
+  assert.equal(f.calls[0].body.p_nickname,'ㅍㄹㅂ');
   const result=await f.client.finishRun({runId,runToken,fullCourse:true,completedTrackCount:3,elapsedMs:54321.2,correctStrokes:654,attemptedStrokes:660});
   assert.equal(f.calls[1].body.p_elapsed_ms,54321);assert.equal(f.calls[1].body.p_run_id,runId);assert.equal(f.calls[1].body.p_run_token,runToken);
   assert.equal(result.record.run_token,undefined);assert.equal(result.record.finish_token,undefined);
@@ -97,9 +97,28 @@ test('network and invalid server tickets remain explicit errors',async()=>{
   await assert.rejects(f.client.finishRun({runId:'id',runToken:'token',fullCourse:true,completedTrackCount:3,elapsedMs:20000,correctStrokes:654,attemptedStrokes:654}),{code:'invalid-run'});
 });
 
-test('nickname normalization handles Korean and Unicode length without markup',()=>{
-  assert.equal(normalizeNickname('  플로버  '),'플로버');assert.equal(normalizeNickname('🎵🎶'),'🎵🎶');
-  for(const value of ['가','<img>','가'.repeat(17)])assert.throws(()=>normalizeNickname(value),{code:'invalid-nickname'});
+test('nicknames accept only kkobak initials, ASCII digits and symbols, from one to six characters',()=>{
+  for(const value of ['ㄱ','ㄲㄸㅃㅆㅉ','ᄀᄂᄒ','0','123456','ㅍㄹㅂ123','<>','!@#$%^','[]{}~`'])assert.equal(normalizeNickname(value),value);
+  assert.equal(normalizeNickname('  ㅍㄹㅂ1!  '),'ㅍㄹㅂ1!');
+  for(const value of ['',null,'가','플로버','ABC','abc','ㅏ','ㄳ','ㄱ 1','ㄱ\n1','🎵','１','١','1234567','ㄱ'.repeat(7)])assert.throws(()=>normalizeNickname(value),{code:'invalid-nickname'},String(value));
+  // Cover every ASCII punctuation/digit individually, including quotes and angle brackets.
+  for(let code=33;code<=126;code++){
+    const char=String.fromCharCode(code);
+    if(/[A-Za-z]/u.test(char))assert.throws(()=>normalizeNickname(char),{code:'invalid-nickname'});
+    else assert.equal(normalizeNickname(char),char);
+  }
+});
+
+test('invalid nicknames never reach nickname or ranking RPCs',async()=>{
+  for(const nickname of ['완성형','English','ㄱ 1','ㄱ'.repeat(7),'ㅏ']){
+    const f=fixture();
+    await assert.rejects(f.client.setNickname(nickname),{code:'invalid-nickname'});
+    await assert.rejects(f.client.startRun({albumIds:['a','b'],fullCourse:true,nickname}),{code:'invalid-nickname'});
+    await assert.rejects(f.client.personal({nickname}),{code:'invalid-nickname'});
+    await assert.rejects(f.client.leaderboard({nickname}),{code:'invalid-nickname'});
+    assert.equal(f.calls.length,0);
+  }
+  const f=fixture([reply({nickname:'ㄱ'})]);assert.deepEqual(await f.client.setNickname('ㄱ'),{nickname:'ㄱ'});
 });
 
 test('nickname ranking version isolates the old Auth version and matches the complete catalog',async()=>{
