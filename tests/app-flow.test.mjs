@@ -27,6 +27,7 @@ class Element {
 
 test('the main screen boots, partial play stays local, and a full completion alone submits a ranking', async () => {
   const html = await readFile(new URL('../dist/index.html', import.meta.url), 'utf8');
+  assert.doesNotMatch(html,/id="play-button"|일시정지/u,'the game has no pause button or pause shortcut hint');
   const course = JSON.parse(await readFile(new URL('../dist/data/album-course.json', import.meta.url), 'utf8'));
   const sales = JSON.parse(await readFile(new URL('../dist/data/first-week-sales.json', import.meta.url), 'utf8'));
   const config = JSON.parse(await readFile(new URL('../dist/data/ranking-config.json', import.meta.url), 'utf8')); config.publishableKey = 'sb_publishable_test_fixture';
@@ -39,6 +40,7 @@ test('the main screen boots, partial play stays local, and a full completion alo
   saved.set('fromis-player-profile-v1',JSON.stringify({nickname:'예전닉네임'}));
   let now = 0, timerId = 0, backendReady = false;
   const timers = new Map(), requests = [];
+  const submitRequests=()=>requests.filter(request=>request.url.endsWith('/fromis_nickname_submit'));
   const schedule = (callback, delay = 0) => { timers.set(++timerId, { callback, at: now + delay }); return timerId; };
   const advance = milliseconds => { const end = now + milliseconds; while (true) { const next = [...timers.entries()].sort((a, b) => a[1].at - b[1].at).find(([, timer]) => timer.at <= end); if (!next) break; timers.delete(next[0]); now = next[1].at; next[1].callback(); } now = end; };
   const settle = async () => { for (let index = 0; index < 30; index++) await Promise.resolve(); };
@@ -48,12 +50,11 @@ test('the main screen boots, partial play stays local, and a full completion alo
     if (url === './data/first-week-sales.json') return result(sales);
     if (url === './data/ranking-config.json') return result(config);
     const body = JSON.parse(options.body || '{}'); requests.push({ url, body });
-    if (url.includes('/auth/')) throw new Error('Nickname mode must not call Supabase Auth');
+    if (url.includes('/auth/') || /\/fromis_nickname_(?:set|begin|finish)$/u.test(url)) throw new Error('Only completed records may be written; profile, start and old finish APIs are retired');
+    assert.equal(body.p_course_version,undefined,'ranking APIs do not receive a course version');
     if (!backendReady) return result({ code: 'PGRST202' }, false);
     if (url.endsWith('/fromis_nickname_leaderboard')) return result([]);
-    if (url.endsWith('/fromis_nickname_set')) throw new Error('Nickname profile writes have been removed');
-    if (url.endsWith('/fromis_nickname_begin')) return result({ eligible: true, run_id: 'fixture-run' });
-    if (url.endsWith('/fromis_nickname_finish')) return result({ eligible: true, record: { run_id: 'fixture-run' } });
+    if (url.endsWith('/fromis_nickname_submit')) return result({ eligible: true, record: { run_id: body.p_id } });
     if (url.endsWith('/fromis_nickname_personal')) return result({ best: null, recent: [] });
     throw new Error('Unexpected fixture request');
   };
@@ -76,23 +77,32 @@ test('the main screen boots, partial play stays local, and a full completion alo
       nodes.get('nickname-input').value=nickname;nodes.get('start-button').emit('click');await settle();
       assert.equal(nodes.get('home-screen').hidden,false);assert.equal(nodes.get('countdown-overlay').hidden,true);
       assert.match(nodes.get('nickname-status').textContent,/1~6글자/u);
-      assert.equal(requests.filter(request=>/fromis_nickname_set|fromis_nickname_begin/u.test(request.url)).length,0);
+      assert.equal(submitRequests().length,0);
     }
     nodes.get('nickname-input').value = 'ㅌㅅㅌ123'; nodes.get('start-button').emit('click'); await settle();
+    assert.equal(submitRequests().length,0,'starting a practice game writes no record');
     const countdownInput = nodes.get('typing-input');
     countdownInput.emit('compositionstart');countdownInput.value='럽밤';countdownInput.emit('input',{isComposing:true});
     assert.equal(nodes.get('countdown-number').textContent, '3'); advance(1000); assert.equal(nodes.get('countdown-number').textContent, '2'); advance(2000);
     assert.notEqual(nodes.get('typing-input'),countdownInput);assert.equal(nodes.get('typing-input').value,'');
     countdownInput.emit('compositionend');countdownInput.emit('input');assert.equal(nodes.get('track-counter').textContent,'1 / 3');
-    for (const track of course.tracks.filter(track => track.albumId === 'from-9')) { advance(1000); const input=nodes.get('typing-input');input.value = track.title; input.emit('input');assert.notEqual(nodes.get('typing-input'),input); }
+    for (const track of course.tracks.filter(track => track.albumId === 'from-9')) { advance(1000); const input=nodes.get('typing-input');input.value = track.title; input.emit('input');assert.notEqual(nodes.get('typing-input'),input);assert.equal(submitRequests().length,0); }
     await settle(); assert.equal(nodes.get('result-panel').hidden, false); assert.match(nodes.get('ranking-result-status').textContent, /랭킹에는 포함되지/u);
-    assert.equal(requests.filter(request => /fromis_nickname_begin|fromis_nickname_finish|\/auth\//u.test(request.url)).length, 0);
+    assert.equal(submitRequests().length,0,'a completed practice game stays local');
     nodes.get('home-button').emit('click'); nodes.get('records-personal').emit('click'); await settle(); assert.match(nodes.get('records-content').textContent, /연습 완주/u);
     nodes.get('nickname-input').value='ㄷㄹㅂ';nodes.get('nickname-input').emit('blur');await settle();assert.doesNotMatch(nodes.get('records-content').textContent,/연습 완주/u);
     nodes.get('nickname-input').value='ㅌㅅㅌ123';nodes.get('nickname-input').emit('change');await settle();assert.match(nodes.get('records-content').textContent,/연습 완주/u);
     backendReady = true; nodes.get('select-all-albums').emit('click'); nodes.get('start-button').emit('click');
-    const cleanCountdownInput=nodes.get('typing-input');await settle();advance(3000);
+    const cleanCountdownInput=nodes.get('typing-input');await settle();assert.equal(submitRequests().length,0);advance(3000);
+    const fullStartedAt=now;
     assert.equal(nodes.get('typing-input'),cleanCountdownInput,'a clean focused input survives countdown to retain the mobile keyboard');
+    assert.equal(submitRequests().length,0,'the full-course countdown creates no pending server row');
+    advance(1000);documentFixture.emit('keydown',{key:'Escape'});advance(2000);
+    nodes.get('catalog-button').emit('click');assert.equal(nodes.get('catalog-dialog').open,true);advance(3000);nodes.get('close-catalog').emit('click');
+    nodes.get('restart-button').emit('click');assert.equal(nodes.get('restart-dialog').open,true);advance(2000);nodes.get('cancel-restart').emit('click');
+    documentFixture.hidden=true;documentFixture.emit('visibilitychange');advance(4000);documentFixture.hidden=false;documentFixture.emit('visibilitychange');
+    assert.equal(nodes.get('game-screen').hidden,false);
+    assert.equal(submitRequests().length,0,'Escape, dialogs and hidden tabs neither submit nor end the run');
     for (const track of course.tracks) {
       advance(1000); const input=nodes.get('typing-input');
       if (/[가-힣]/u.test(track.title)) {
@@ -106,16 +116,23 @@ test('the main screen boots, partial play stays local, and a full completion alo
       input.emit('compositionend');input.emit('input');
       assert.equal(nodes.get('typing-input').value,'');
       if (track!==course.tracks.at(-1)) assert.equal(documentFixture.activeElement,nodes.get('typing-input'));
+      if (track!==course.tracks.at(-1)) assert.equal(submitRequests().length,0,'no record is sent before the last of all 67 songs');
     }
     await settle();
     assert.match(nodes.get('ranking-result-status').textContent, /랭킹에 남겼/u);
-    const submissions = requests.filter(request => request.url.endsWith('/fromis_nickname_finish'));
+    const submissions = submitRequests();
     assert.equal(submissions.length, 1); assert.equal(submissions[0].body.p_completed_track_count, 67);
-    assert.equal(submissions[0].body.p_run_token,undefined);
-    assert.equal(requests.filter(request=>request.url.endsWith('/fromis_nickname_set')).length,0);
+    assert.deepEqual(Object.keys(submissions[0].body).sort(),['p_id','p_nickname','p_device','p_album_ids','p_completed_track_count','p_elapsed_ms','p_correct_strokes','p_attempted_strokes'].sort());
+    assert.match(submissions[0].body.p_id,/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu);
+    assert.equal(submissions[0].body.p_nickname,'ㅌㅅㅌ123');assert.equal(submissions[0].body.p_device,'pc');
+    assert.deepEqual(submissions[0].body.p_album_ids,course.albums.map(album=>album.id));
+    assert.equal(submissions[0].body.p_elapsed_ms,79000,'all 12 seconds away from typing remain in the elapsed time');
+    assert.equal(submissions[0].body.p_elapsed_ms,now-fullStartedAt);
+    assert.equal(requests.filter(request=>/\/fromis_nickname_(?:set|begin|finish)$/u.test(request.url)).length,0);
     assert.equal(nodes.has('save-nickname'),false);
-    assert.equal(requests.filter(request => request.url.endsWith('/fromis_nickname_begin')).length, 1);
+    assert.equal(nodes.has('play-button'),false);
     assert.equal(requests.filter(request => request.url.includes('/auth/')).length,0);
     const records = JSON.parse(storage.getItem('fromis-personal-records-v1')); assert.equal(records.length, 2); assert.equal(records.filter(record => record.isFullCourse).length, 1);
+    const fullRecord=records.find(record=>record.isFullCourse);assert.equal(fullRecord.elapsedMs,79000);assert.equal(fullRecord.id,submissions[0].body.p_id);assert.equal(fullRecord.rankRunId,fullRecord.id);
   } finally { for (const [key, descriptor] of original) { if (descriptor) Object.defineProperty(globalThis, key, descriptor); else delete globalThis[key]; } }
 });

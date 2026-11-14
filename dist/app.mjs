@@ -9,7 +9,7 @@ import { createHomeRecords } from './home-records.mjs';
 import { createRankingClient, normalizeNickname } from './ranking-client.mjs';
 
 const byId = id => document.getElementById(id);
-const ui = Object.fromEntries(['album-cover','album-name','album-sales','cpm','accuracy','elapsed','typing-input','target-text','typing-line','input-hint','state-label','track-counter','upcoming-tracks','course-progress','progress-fill','progress-percentage','journey-label','play-button','restart-button','game-board','result-panel','result-description','result-time','result-cpm','result-accuracy','best-message','album-memories','best-record','course-summary','course-count','chart-note','chart-view-label','chart-view-button','error-message','announcement','catalog-dialog','catalog-list','catalog-scope','sales-definition','sources-list','excluded-summary','catalog-updated','restart-dialog'].map(id => [id,byId(id)]));
+const ui = Object.fromEntries(['album-cover','album-name','album-sales','cpm','accuracy','elapsed','typing-input','target-text','typing-line','input-hint','state-label','track-counter','upcoming-tracks','course-progress','progress-fill','progress-percentage','journey-label','restart-button','game-board','result-panel','result-description','result-time','result-cpm','result-accuracy','best-message','album-memories','best-record','course-summary','course-count','chart-note','chart-view-label','chart-view-button','error-message','announcement','catalog-dialog','catalog-list','catalog-scope','sales-definition','sources-list','excluded-summary','catalog-updated','restart-dialog'].map(id => [id,byId(id)]));
 let input = ui['typing-input'];
 const clock = () => performance.now();
 let safeStorage;try{safeStorage=localStorage;}catch{}
@@ -17,7 +17,7 @@ const personalRecords=createPersonalRecords(safeStorage);
 let catalog, salesData, albums, courseTracks, session, chartModel, chartView, signature, inputController;
 let courseCatalog, fullCourse, activeCourse, previewCourse, selectedIds=new Set(), recordsPanel, rankingConfig={enabled:false}, rankingClient=createRankingClient({enabled:false}), runContext, currentNickname='';
 let best = null, lastResult = null, shownAlbum = null, lastFinished = false, overview = false;
-let catalogWasRunning = false, restartWasRunning = false, restartAction = 'restart', tick = null, phase = 'home';
+let restartConfirmed = false, restartAction = 'restart', tick = null, phase = 'home';
 for(const id of ['home-screen','game-screen','home-albums','home-course-count','home-best','start-button','countdown-overlay','countdown-number','sales-label','load-error'])ui[id]=byId(id);
 for(const id of ['nickname-input','nickname-status','course-mode-badge','course-eligibility','ranking-result-status'])ui[id]=byId(id);
 
@@ -25,7 +25,12 @@ function readStorage(key) { try { return JSON.parse(localStorage.getItem(key)); 
 function writeStorage(key,value) { try { localStorage.setItem(key,JSON.stringify(value)); } catch {} }
 function announce(text) { ui.announcement.textContent = text; }
 function deviceCategory(){return matchMedia('(pointer:coarse)').matches?'mobile':'pc';}
-function uniqueId(){return crypto.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;}
+function uniqueId(){
+  if(crypto.randomUUID)return crypto.randomUUID();
+  const bytes=crypto.getRandomValues(new Uint8Array(16));bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;
+  const hex=Array.from(bytes,byte=>byte.toString(16).padStart(2,'0')).join('');
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+}
 function nicknameError(text){ui['nickname-status'].textContent=text;ui['nickname-status'].classList.toggle('has-error',Boolean(text));ui['nickname-input'].setAttribute('aria-invalid',String(Boolean(text)));}
 function nicknameValue(){return normalizeNickname(ui['nickname-input'].value);}
 function saveNicknameLocally(value){currentNickname=value;writeStorage('fromis-player-profile-v1',{nickname:value});rankingClient.useNickname?.(value);ui['nickname-input'].value=value;nicknameError('');ui['nickname-status'].textContent='같은 닉네임의 기록은 하나로 묶여요.';}
@@ -58,10 +63,7 @@ function prepareCourse(course){
   ui['course-summary'].textContent=`${course.isFullCourse?'전체 코스 · 랭킹 대상':'선택 앨범 연습 · 랭킹 제외'} · 비공식 집계 포함`;
 }
 function createRunContext(nickname){
-  const context={id:uniqueId(),course:activeCourse,nickname,device:deviceCategory(),client:rankingClient};
-  context.onlineEligible=false;context.ticketReady=false;
-  context.rankingStart=(context.course.isFullCourse&&context.client.configured?context.client.startRun({albumIds:context.course.albumIds,fullCourse:true,device:context.device,nickname}).catch(error=>({error})):Promise.resolve({eligible:false,reason:context.course.isFullCourse?'not-configured':'practice'})).then(ticket=>{context.ticket=ticket;context.ticketReady=true;return ticket;});
-  return context;
+  return {id:uniqueId(),course:activeCourse,nickname,device:deviceCategory(),client:rankingClient};
 }
 function formatTime(milliseconds, precise = false) {
   const tenths = Math.max(0,Math.floor(milliseconds/100));
@@ -121,20 +123,18 @@ function render(state) {
   if(state.status==='completed'){finish(state);return;}
   ui['game-board'].hidden=false;ui['game-board'].classList.remove('is-completed');ui['result-panel'].hidden=true;
   updateAlbum(state.currentTrack);
-  input.disabled=phase==='home';input.readOnly=state.status==='paused';
+  input.disabled=phase==='home';input.readOnly=false;
   inputController?.syncValue(state);
   renderFeedback(state);renderUpcoming(state);renderProgress(state);
   ui['track-counter'].textContent=`${state.index+1} / ${state.progress.total}`;
   let hint='제목을 끝까지 치면 다음 곡으로 넘어가요.';
   if(state.status==='ready')hint='보이는 제목을 입력하면 시작해요.';
-  else if(state.status==='paused')hint='계속하기를 누르면 이어서 칠 수 있어요.';
   else if(state.hasError)hint='빨간 글자를 고쳐주세요.';
   if(phase==='countdown')hint='카운트다운 뒤 자동으로 시작해요.';
   ui['input-hint'].textContent=hint;ui['input-hint'].title=hint;ui['input-hint'].classList.toggle('has-error',state.hasError);
-  ui['state-label'].textContent=({ready:'준비',running:'입력 중',paused:'일시정지'})[state.status];
-  if(state.status==='running'&&runContext&&!runContext.onlineEligible)ui['state-label'].textContent=runContext.course.isFullCourse?'입력 중 · 개인 기록':'입력 중 · 연습';
-  ui['play-button'].textContent=({ready:'시작하기',running:'일시정지',paused:'계속하기'})[state.status];
-  ui['play-button'].disabled=phase!=='game';ui['restart-button'].disabled=phase!=='game';
+  ui['state-label'].textContent=state.status==='running'?'입력 중':'준비';
+  if(state.status==='running'&&runContext){if(!runContext.course.isFullCourse)ui['state-label'].textContent='입력 중 · 연습';else if(!runContext.client.configured)ui['state-label'].textContent='입력 중 · 개인 기록';}
+  ui['restart-button'].disabled=phase!=='game';
 }
 function bindInput(fresh,previous){
   previous?.removeEventListener('scroll',syncScroll);
@@ -144,11 +144,8 @@ function bindInput(fresh,previous){
   fresh.addEventListener('focus',updateViewport);
 }
 ui['typing-line'].addEventListener('click',focusInput);
-function pause(){if(session?.status==='running'){inputController?.cancel();render(session.pause(clock()));}}
-function resume(){if(session?.status!=='paused'||phase!=='game')return;render(session.resume(clock()));inputController?.flush();focusInput();}
-ui['play-button'].addEventListener('click',()=>{if(session.status==='running')pause();else if(session.status==='paused')resume();else beginRun();});
-document.addEventListener('keydown',event=>{if(event.key!=='Escape'||event.isComposing||inputController?.isComposing()||ui['catalog-dialog'].open||ui['restart-dialog'].open)return;if(phase==='countdown'){event.preventDefault();showHome();}else if(phase==='game'&&session?.status==='running'){event.preventDefault();pause();}else if(phase==='game'&&session?.status==='paused'){event.preventDefault();resume();}});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){if(phase==='countdown')showHome({focus:false});else pause();}});
+function restoreInput(){if(phase!=='game'||document.hidden||ui['catalog-dialog'].open||ui['restart-dialog'].open)return;inputController?.flush();focusInput();}
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(phase==='countdown')showHome({focus:false});else if(phase==='game')inputController?.cancel();}else restoreInput();});
 function setOverview(value){overview=Boolean(value);chartView?.setOverview(overview);ui['chart-view-button'].textContent=overview?'따라가기':'전체 차트';ui['chart-view-button'].setAttribute('aria-pressed',String(overview));ui['chart-view-label'].textContent=overview?'전체 앨범 · 단위: 장':'세로 확대 · 단위: 장';}
 ui['chart-view-button'].addEventListener('click',()=>setOverview(!overview));
 function reset({focus=true}={}) {
@@ -156,16 +153,16 @@ function reset({focus=true}={}) {
   const state=session.reset();inputController?.reset();input.value='';input.scrollLeft=0;chartModel.reset();setOverview(false);render(state);
   if(focus){focusInput();announce('첫 앨범부터 다시 시작해요.');}
 }
-function confirmLeave(action){restartAction=action;restartWasRunning=session.status==='running';pause();byId('restart-heading').textContent=action==='home'?'메인으로 돌아갈까요?':'처음부터 다시 시작할까요?';byId('confirm-restart').textContent=action==='home'?'메인으로':'다시 시작';ui['restart-dialog'].showModal();}
+function confirmLeave(action){restartAction=action;restartConfirmed=false;inputController?.cancel();byId('restart-heading').textContent=action==='home'?'메인으로 돌아갈까요?':'처음부터 다시 시작할까요?';byId('confirm-restart').textContent=action==='home'?'메인으로':'다시 시작';ui['restart-dialog'].showModal();}
 ui['restart-button'].addEventListener('click',()=>confirmLeave('restart'));
 byId('home-button').addEventListener('click',()=>{if(session.status==='completed'||session.status==='ready')showHome();else confirmLeave('home');});
 byId('cancel-restart').addEventListener('click',()=>ui['restart-dialog'].close());
-byId('confirm-restart').addEventListener('click',()=>{restartWasRunning=false;ui['restart-dialog'].close();if(restartAction==='home')showHome();else beginRun();});
-ui['restart-dialog'].addEventListener('close',()=>{if(restartWasRunning)resume();restartWasRunning=false;});
+byId('confirm-restart').addEventListener('click',()=>{restartConfirmed=true;ui['restart-dialog'].close();if(restartAction==='home')showHome();else beginRun();});
+ui['restart-dialog'].addEventListener('close',()=>{if(!restartConfirmed)restoreInput();restartConfirmed=false;});
 byId('replay-button').addEventListener('click',()=>beginRun());
 function renderBest(){const course=phase==='home'?previewCourse:activeCourse;best=course?bestForCourse(personalRecords.list(),course.signature,deviceCategory(),currentNickname):null;const text=best?`이 코스 개인 최고 ${formatTime(best.elapsedMs,true)}`:'';ui['best-record'].textContent=text;ui['home-best'].textContent=text;recordsPanel?.summary();}
 
-const countdown=createCountdown({onTick:number=>{const digit=document.createElement('span');digit.className='countdown-digit';digit.textContent=String(number);ui['countdown-number'].replaceChildren(digit);},onDone:()=>{if(phase!=='countdown'||document.hidden)return;runContext.onlineEligible=Boolean(runContext.course.isFullCourse&&runContext.ticketReady&&runContext.ticket?.eligible);if(inputController.isComposing()||input.value!=='')inputController.reset();phase='game';ui['countdown-overlay'].hidden=true;render(session.start(clock()));focusInput();announce('시작! 보이는 제목을 따라 입력해주세요.');}});
+const countdown=createCountdown({onTick:number=>{const digit=document.createElement('span');digit.className='countdown-digit';digit.textContent=String(number);ui['countdown-number'].replaceChildren(digit);},onDone:()=>{if(phase!=='countdown'||document.hidden)return;if(inputController.isComposing()||input.value!=='')inputController.reset();phase='game';ui['countdown-overlay'].hidden=true;render(session.start(clock()));focusInput();announce('시작! 보이는 제목을 따라 입력해주세요.');}});
 function beginRun(){if(!previewCourse)return;let nickname;try{nickname=nicknameValue();}catch(error){nicknameError(error.message);ui['nickname-input'].focus();return;}saveNicknameLocally(nickname);countdown.cancel();inputController?.cancel();phase='countdown';document.body.classList.remove('is-home');ui['home-screen'].hidden=true;ui['game-screen'].hidden=false;prepareCourse(previewCourse);runContext=createRunContext(nickname);reset({focus:false});ui['countdown-overlay'].hidden=false;input.disabled=false;input.readOnly=false;input.focus({preventScroll:true});updateViewport();countdown.start();}
 function showHome({focus=true}={}){countdown.cancel();inputController?.cancel();phase='home';document.body.classList.add('is-home');ui['countdown-overlay'].hidden=true;if(session)reset({focus:false});ui['game-screen'].hidden=true;ui['home-screen'].hidden=false;input.blur();updateViewport();if(courseCatalog)updatePicker();recordsPanel?.refresh();if(focus)ui['start-button'].focus({preventScroll:true});}
 ui['start-button'].addEventListener('click',beginRun);
@@ -177,7 +174,7 @@ function finish(state) {
   ui['journey-label'].textContent=`${activeCourse.albums.length}앨범 · ${courseTracks.length}곡 완주`;ui['progress-percentage'].textContent='100%';ui['progress-fill'].style.width='100%';
   ui['course-progress'].setAttribute('aria-valuenow','100');ui['course-progress'].setAttribute('aria-valuetext','모든 앨범 완주');
   updateViewport();if(lastFinished)return;lastFinished=true;
-  const context=runContext,previous=bestForCourse(personalRecords.list(),signature,context.device,context.nickname),record={id:uniqueId(),signature,courseVersion:rankingConfig.courseVersion||'local',albumIds:[...activeCourse.albumIds],albumTitles:activeCourse.albums.map(album=>album.title),trackCount:courseTracks.length,isFullCourse:activeCourse.isFullCourse,device:context.device,nickname:context.nickname,elapsedMs:state.stats.elapsedMs,cpm:Math.round(state.stats.cpm),accuracy:Number(state.stats.accuracy.toFixed(1)),completedAt:new Date().toISOString()};
+  const context=runContext,previous=bestForCourse(personalRecords.list(),signature,context.device,context.nickname),record={id:uniqueId(),signature,albumIds:[...activeCourse.albumIds],albumTitles:activeCourse.albums.map(album=>album.title),trackCount:courseTracks.length,isFullCourse:activeCourse.isFullCourse,device:context.device,nickname:context.nickname,elapsedMs:state.stats.elapsedMs,cpm:Math.round(state.stats.cpm),accuracy:Number(state.stats.accuracy.toFixed(1)),completedAt:new Date().toISOString()};
   const isBest=!previous||record.elapsedMs<previous.elapsedMs;personalRecords.add(record);lastResult=record;
   ui['result-description'].textContent=`${activeCourse.albums.length}개 앨범의 ${courseTracks.length}곡을 발매순으로 완주했어요.${activeCourse.isFullCourse?'':' 선택 앨범 연습 코스예요.'}`;
   ui['result-time'].textContent=formatTime(record.elapsedMs,true);ui['result-cpm'].textContent=String(record.cpm);ui['result-accuracy'].textContent=`${record.accuracy}%`;
@@ -188,9 +185,9 @@ function finish(state) {
 async function saveCompletionRanking(record,state,context){
   const show=text=>{if(runContext?.id===context.id)ui['ranking-result-status'].textContent=text;};
   if(!context.course.isFullCourse){show('선택 앨범 연습 기록은 개인 기록에 저장했어요. 주간·전체 랭킹에는 포함되지 않아요.');return;}
-  if(!context.onlineEligible){show('온라인 랭킹 연결을 완료하지 못했어요. 개인 기록은 이 기기에 저장했어요.');return;}
+  if(!context.client.configured){show('온라인 랭킹 연결을 완료하지 못했어요. 개인 기록은 이 기기에 저장했어요.');return;}
   show('전체 코스 기록을 랭킹에 저장하고 있어요.');
-  try{const result=await context.client.finishRun({runId:context.ticket.run_id,fullCourse:context.course.isFullCourse,completedTrackCount:state.progress.completed,elapsedMs:record.elapsedMs,correctStrokes:state.stats.correctStrokes,attemptedStrokes:state.stats.attemptedStrokes});if(result.eligible){personalRecords.uploaded(record.id,context.ticket.run_id);show('전체 코스 기록을 주간·전체 랭킹에 남겼어요.');if(phase==='home')recordsPanel?.refresh();}else show('이 기록은 개인 기록에만 저장했어요.');}catch{show('온라인 랭킹에 저장하지 못했어요. 개인 기록은 이 기기에 저장했어요.');}
+  try{const result=await context.client.finishRun({runId:record.id,nickname:context.nickname,device:context.device,albumIds:context.course.albumIds,fullCourse:context.course.isFullCourse,completedTrackCount:state.progress.completed,elapsedMs:record.elapsedMs,correctStrokes:state.stats.correctStrokes,attemptedStrokes:state.stats.attemptedStrokes});if(result.eligible){personalRecords.uploaded(record.id,result.record.run_id);show('전체 코스 기록을 주간·전체 랭킹에 남겼어요.');if(phase==='home')recordsPanel?.refresh();}else show('이 기록은 개인 기록에만 저장했어요.');}catch{show('온라인 랭킹에 저장하지 못했어요. 개인 기록은 이 기기에 저장했어요.');}
 }
 byId('copy-button').addEventListener('click',async()=>{
   if(!lastResult)return;const text=`fromis_9 chart journey\n${lastResult.albumIds.length}앨범 · ${lastResult.trackCount}곡 ${lastResult.isFullCourse?'전체 완주':'연습 완주'} · ${formatTime(lastResult.elapsedMs,true)}\n${lastResult.cpm}타 · 정확도 ${lastResult.accuracy}%\n${location.href.split('?')[0]}`;
@@ -218,9 +215,9 @@ function buildCatalog() {
   });
   ui['catalog-list'].replaceChildren(fragment);
 }
-function openCatalog(){if(!session)return;catalogWasRunning=session.status==='running';pause();buildCatalog();ui['catalog-dialog'].showModal();}
+function openCatalog(){if(!session)return;inputController?.cancel();buildCatalog();ui['catalog-dialog'].showModal();}
 byId('catalog-button').addEventListener('click',openCatalog);byId('sources-button').addEventListener('click',openCatalog);byId('close-catalog').addEventListener('click',()=>ui['catalog-dialog'].close());
-ui['catalog-dialog'].addEventListener('close',()=>{if(catalogWasRunning)resume();else focusInput();catalogWasRunning=false;});
+ui['catalog-dialog'].addEventListener('close',restoreInput);
 function initializeTheme(){const stored=readStorage('fromis-typing-theme');if(stored==='light'||stored==='dark')document.documentElement.dataset.theme=stored;byId('theme-button').addEventListener('click',()=>{const current=document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');const next=current==='dark'?'light':'dark';document.documentElement.dataset.theme=next;writeStorage('fromis-typing-theme',next);byId('theme-button').setAttribute('aria-label',next==='dark'?'밝은 화면으로 변경':'어두운 화면으로 변경');});}
 async function initialize() {
   initializeTheme();
@@ -231,7 +228,7 @@ async function initialize() {
     const chartAlbums=catalog.albums.map(album=>{const record=records.get(album.id);return{...album,firstWeekSales:record?.sales??null,approximate:Boolean(record?.approximate),salesRecord:record};});
     albums=new Map(chartAlbums.map(album=>[album.id,album]));courseCatalog={...catalog,albums:chartAlbums};fullCourse=buildCourse(courseCatalog);
     prepareCourse(fullCourse);
-    inputController=attachInputController({input,session:()=>session,now:clock,onState:render,onAnnounce:announce,onInputReplaced:bindInput,canInput:()=>phase==='game'&&!ui['catalog-dialog'].open&&!ui['restart-dialog'].open});
+    inputController=attachInputController({input,session:()=>session,now:clock,onState:render,onAnnounce:announce,onInputReplaced:bindInput,canInput:()=>phase==='game'&&!document.hidden&&!ui['catalog-dialog'].open&&!ui['restart-dialog'].open});
     const storedNickname=readStorage('fromis-player-profile-v1')?.nickname;
     let nickname='';
     try{nickname=normalizeNickname(storedNickname??`ㅍㄹㅂ${Math.floor(Math.random()*900+100)}`);}catch{nicknameError('닉네임 규칙이 바뀌었어요. 초성·숫자·특수기호 1~6글자로 다시 입력해주세요.');}
@@ -254,5 +251,5 @@ function startTick(){if(!tick)tick=setInterval(()=>{if(session?.status==='runnin
 const viewport=window.visualViewport;let largestViewportHeight=viewport?.height||innerHeight,previousViewportWidth=viewport?.width||innerWidth;
 function updateViewport(){const height=viewport?.height||innerHeight,width=viewport?.width||innerWidth;if(Math.abs(width-previousViewportWidth)>80)largestViewportHeight=height;else largestViewportHeight=Math.max(largestViewportHeight,height);previousViewportWidth=width;const keyboardOpen=phase!=='home'&&session?.status!=='completed'&&matchMedia('(pointer:coarse)').matches&&largestViewportHeight-height>120;document.documentElement.style.setProperty('--viewport-height',`${Math.floor(height)}px`);document.documentElement.classList.toggle('keyboard-open',keyboardOpen);}
 viewport?.addEventListener('resize',updateViewport);window.addEventListener('resize',updateViewport);bindInput(input);updateViewport();
-window.addEventListener('pagehide',()=>{if(phase==='countdown')showHome({focus:false});inputController?.cancel();if(tick)clearInterval(tick);tick=null;});window.addEventListener('pageshow',()=>{if(session)startTick();});
+window.addEventListener('pagehide',()=>{if(phase==='countdown')showHome({focus:false});inputController?.cancel();if(tick)clearInterval(tick);tick=null;});window.addEventListener('pageshow',()=>{if(session){startTick();restoreInput();}});
 initialize();
