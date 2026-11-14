@@ -1,3 +1,5 @@
+import { createSalesAxis, salesToY } from './chart-axis.mjs';
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
 let nextViewId = 0;
 
@@ -11,13 +13,17 @@ function svgNode(name, attributes = {}, text) {
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const knownSales = album => Number.isFinite(album?.firstWeekSales) && album.firstWeekSales > 0;
 
-function niceMaximum(albums, fallback = 1) {
-  const values = albums.filter(knownSales).map(album => album.firstWeekSales);
-  if (!values.length) return fallback;
-  const maximum = Math.max(...values);
-  const power = 10 ** Math.floor(Math.log10(maximum));
-  const fraction = maximum / power;
-  return (fraction <= 1 ? 1 : fraction <= 2 ? 2 : fraction <= 5 ? 5 : 10) * power;
+function salesMetric(album) {
+  const record = album.salesRecord;
+  if (record?.metricLabel) return record.metricLabel;
+  return record?.chartSystem === 'oricon' ? '오리콘 첫 주' : '발매 첫 7일';
+}
+
+function salesTitle(album) {
+  const record = album.salesRecord;
+  const system = record?.chartSystem === 'hanteo' ? ' (한터)' : '';
+  const unofficial = record?.sourceType === 'unofficial' ? ' · 팬 정리 자료' : '';
+  return `${album.title} (${album.date || ''}) · ${salesMetric(album)}${system} ${album.approximate ? '약 ' : ''}${album.firstWeekSales.toLocaleString('ko-KR')}장${unofficial}`;
 }
 
 function compactNumber(value) {
@@ -63,8 +69,8 @@ export class SalesChartView {
     this.overview = false;
     this._destroyed = false;
     this._albumIndex = -1;
-    this._localMaximum = 1;
-    this._globalMaximum = niceMaximum(albums);
+    this._globalAxis = createSalesAxis(albums, { overview: true });
+    this._localAxis = this._globalAxis;
     this._id = `sales-chart-${++nextViewId}`;
     this._lastSnapshot = {
       currentAlbum: albums[0], album: { index: 0, ratio: 0 },
@@ -108,7 +114,7 @@ export class SalesChartView {
     const albumIndex = clamp(snapshot.album?.index ?? 0, 0, this.albums.length - 1);
     if (albumIndex !== this._albumIndex) {
       this._albumIndex = albumIndex;
-      this._localMaximum = niceMaximum(this.albums.slice(Math.max(0, albumIndex - 2), albumIndex + 4), this._localMaximum > 1 ? this._localMaximum : this._globalMaximum);
+      this._localAxis = createSalesAxis(this.albums, { albumIndex, fallback: this._localAxis });
     }
     const count = this.albums.length;
     const span = this.overview ? count : Math.min(count, 3.3);
@@ -116,13 +122,13 @@ export class SalesChartView {
     const start = this.overview ? 0 : clamp(plotIndex - span * .4, 0, Math.max(0, count - span));
     const top = height < 110 ? 10 : 20;
     const bottom = Math.max(top + 1, height - (height < 110 ? 31 : 39));
-    const box = { left: Math.min(44, width * .17), right: Math.max(1, width - 16), top, bottom };
+    const box = { left: Math.min(56, width * .22), right: Math.max(1, width - 16), top, bottom };
     if (box.right <= box.left) box.right = box.left + 1;
-    const maximum = this.overview ? this._globalMaximum : this._localMaximum;
+    const axis = this.overview ? this._globalAxis : this._localAxis;
     return {
-      width, height, albumIndex, start, end: start + span, maximum, box,
+      width, height, albumIndex, start, end: start + span, ...axis, box,
       x: index => box.left + (index - start) / span * (box.right - box.left),
-      y: value => box.bottom - value / maximum * (box.bottom - box.top),
+      y: value => salesToY(value, axis, box.top, box.bottom),
       titleY: height - (height < 110 ? 17 : 23),
       yearY: height - (height < 110 ? 5 : 10)
     };
@@ -132,27 +138,29 @@ export class SalesChartView {
     if (this._destroyed) return;
     const snapshot = this._lastSnapshot;
     const layout = this._layout(snapshot);
-    const { width, height, box, maximum, x, y } = layout;
+    const { width, height, box, minimum, maximum, x, y } = layout;
     const root = document.createDocumentFragment();
     this.svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     this.svg.setAttribute('width', String(width));
     this.svg.setAttribute('height', String(height));
     this.svg.dataset.mode = this.overview ? 'overview' : 'follow';
+    this.svg.dataset.yMin = String(minimum);
     this.svg.dataset.yMax = String(maximum);
     this.svg.dataset.windowStart = layout.start.toFixed(4);
     this.svg.dataset.windowEnd = layout.end.toFixed(4);
     this.svg.dataset.albumId = snapshot.currentAlbum?.id || this.albums[layout.albumIndex].id;
 
-    root.append(svgNode('title', { id: `${this._id}-title` }, '프로미스나인 앨범 초동 판매량과 타이핑 진행'));
+    root.append(svgNode('title', { id: `${this._id}-title` }, '프로미스나인 앨범 첫 주 판매량과 타이핑 진행'));
     root.append(svgNode('desc', { id: `${this._id}-description` },
-      `${this.overview ? '전체 앨범 보기' : '현재 앨범 주변 보기'}. 가로축은 발매 순서, 세로축은 0부터 ${maximum.toLocaleString('ko-KR')}장까지 선형 눈금입니다. ` +
-      '원은 확인된 앨범 초동 판매량이며 약으로 표시한 값은 근삿값입니다. 움직이는 재킷은 타이핑 진행 위치이며 그 높이는 별도 판매량 측정치가 아닙니다. 미확인 구간의 선은 끊고 마지막 점선은 판매량 변화 없는 가상 완주 구간입니다.'));
+      `${this.overview ? '전체 앨범 보기. 세로축은 0을 기준으로 합니다' : '현재 앨범 주변 보기. 세로축을 주변 판매량 범위로 확대하며 앨범이 바뀔 때만 범위를 조정합니다'}. ` +
+      `가로축은 발매 순서, 세로축은 ${minimum.toLocaleString('ko-KR')}장부터 ${maximum.toLocaleString('ko-KR')}장까지 선형 눈금입니다. ` +
+      '원은 앨범별 첫 주 판매량이며 약으로 표시한 값은 근삿값입니다. 오리콘 첫 주와 팬 정리 자료는 각 점의 설명에서 구분합니다. 움직이는 재킷은 타이핑 진행 위치이며 그 높이는 별도 판매량 측정치가 아닙니다. 미확인 구간의 선은 끊고 마지막 점선은 판매량 변화 없는 가상 완주 구간입니다.'));
 
-    const ticks = height < 110 ? [0, maximum] : [0, maximum / 2, maximum];
+    const ticks = height < 110 ? [minimum, maximum] : layout.ticks;
     for (const value of ticks) {
       const lineY = clamp(y(value), box.top, box.bottom);
       root.append(svgNode('line', { class: 'chart-grid', x1: box.left, y1: lineY, x2: box.right, y2: lineY, 'aria-hidden': 'true' }));
-      root.append(svgNode('text', { class: 'chart-axis-label', x: Math.max(1, box.left - 7), y: clamp(lineY + 3, 10, height - 3), 'text-anchor': 'end', 'font-size': 10 }, compactNumber(value)));
+      root.append(svgNode('text', { class: 'chart-axis-label', x: Math.max(1, box.left - 7), y: clamp(lineY + 3, 10, height - 3), 'text-anchor': 'end', 'font-size': 10, 'data-axis-value': value }, value.toLocaleString('ko-KR', { maximumFractionDigits: 2 })));
     }
 
     const pathParts = [];
@@ -186,8 +194,8 @@ export class SalesChartView {
           previousUnknownLabelX = labelX;
         }
       } else if (point.y >= box.top - .1 && point.y <= box.bottom + .1) {
-        const circle = svgNode('circle', { class: 'chart-anchor', cx: point.x, cy: clamp(point.y, box.top, box.bottom), r: 3, 'data-album-id': album.id, 'data-sales': album.firstWeekSales, 'data-approximate': Boolean(album.approximate) });
-        circle.append(svgNode('title', {}, `${album.title} (${album.date || ''}) · 초동 ${album.approximate ? '약 ' : ''}${album.firstWeekSales.toLocaleString('ko-KR')}장`));
+        const circle = svgNode('circle', { class: 'chart-anchor', cx: point.x, cy: clamp(point.y, box.top, box.bottom), r: 3, 'data-album-id': album.id, 'data-sales': album.firstWeekSales, 'data-approximate': Boolean(album.approximate), 'data-chart-system': album.salesRecord?.chartSystem || 'unspecified' });
+        circle.append(svgNode('title', {}, salesTitle(album)));
         root.append(circle);
       }
     }

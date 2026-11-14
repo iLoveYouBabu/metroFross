@@ -1,6 +1,6 @@
 {
   "updatedAt": "2026-11-14",
-  "scope": "상업적으로 정식 발매된 프로미스나인 실물 앨범(정규·미니/EP·실물 싱글 앨범) 14종의 고유 곡 67곡. 디지털 싱글·OST·외부 프로젝트·경연 컴필레이션은 제외한다. 선택된 실물 발매 안에서 최초 수록된 위치를 기준으로 발매일·실제 트랙 번호 순서로 입력하며 같은 곡의 재수록·재녹음·언어별 버전·반주는 한 번만 처리한다. 디지털 선공개 뒤 실물 앨범에 들어간 곡은 제외하지 않고 해당 실물 수록 위치에서 포함한다. 일본 EP는 실물 발매 근거로 포함하며 초동 차트 값의 유무는 별도 검증한다.",
+  "scope": "상업적으로 정식 발매된 프로미스나인 실물 앨범(정규·미니/EP·실물 싱글 앨범) 14종의 고유 곡 67곡. 디지털 싱글·OST·외부 프로젝트·경연 컴필레이션은 제외한다. 선택된 실물 발매 안에서 최초 수록된 위치를 기준으로 발매일·실제 트랙 번호 순서로 입력하며 같은 곡의 재수록·재녹음·언어별 버전·반주는 한 번만 처리한다. 디지털 선공개 뒤 실물 앨범에 들어간 곡은 제외하지 않고 해당 실물 수록 위치에서 포함한다. 일본 EP는 실물 발매 근거로 포함하며 초동 차트 값의 유무는 별도 검증한다. 게임 화면과 기본 입력 대상인 title에는 사용자 지정 타이핑 표기 15개를 적용한다. 이 변경은 공식 곡명 변경이 아니며 원제는 originalTitle과 aliases, 보존 카탈로그에 남긴다.",
   "albums": [
     {
       "id": "to-heart",
@@ -286,7 +286,7 @@
         "url": "https://www.universal-music.co.jp/fromis9/products/umck-7310/",
         "details": "일본 첫 EP의 CD + Photobook 상품, 2026-04-01 발매, 6트랙과 3번 신곡 Sky Runner를 확인. 일본 판매 집계와 한터 초동은 별도 검증 대상."
       },
-      "note": "실물 일본 EP를 포함하되 기존 곡의 일본어 버전과 반주곡은 제외하여 새 오리지널곡 Sky Runner 3번만 입력한다. 한터 초동 값은 검증된 별도 차트 데이터에서만 연결한다."
+      "note": "실물 일본 EP를 포함하되 기존 곡의 일본어 버전과 반주곡은 제외하여 새 오리지널곡 Sky Runner 3번만 입력한다. 판매량은 별도 자료의 오리콘 첫 주·비공식 집계 표시를 따른다."
     },
     {
       "id": "glow-me",
@@ -313,18 +313,24 @@
   "tracks": [
     {
       "id": "to-heart-01",
-      "title": "나에게로 오는 길 (Intro.)",
+      "title": "나에게로 오는 길",
       "albumId": "to-heart",
       "trackNumber": 1,
+      "originalTitle": "나에게로 오는 길 (Intro.)",
       "aliases": [
-        "The Way To Me (Intro.)"
+        "The Way To Me (Intro.)",
+        "나에게로 오는 길 (Intro.)"
       ]
     },
     {
       "id": "to-heart-02",
-      "title": "To Heart",
+      "title": "투 하트",
       "albumId": "to-heart",
-      "trackNumber": 2
+      "trackNumber": 2,
+      "originalTitle": "To Heart",
+      "aliases": [
+        "To Heart"
+      ]
     },
     {
       "id": "to-heart-03",
@@ -388,13 +394,15 @@
     },
     {
       "id": "to-day-03",
-      "title": "두근두근(DKDK)",
+      "title": "두근두근",
       "albumId": "to-day",
       "trackNumber": 3,
+      "originalTitle": "두근두근(DKDK)",
       "aliases": [
         "두근두근 (DKDK)",
         "Pitapat (DKDK)",
-        "DKDK"
+        "DKDK",
+        "두근두근(DKDK)"
       ]
     },
     {
@@ -409,9 +417,13 @@
     },
     {
       "id": "to-day-05",
-      "title": "CLOVER",
+      "title": "클로버",
       "albumId": "to-day",
-      "trackNumber": 5
+      "trackNumber": 5,
+      "originalTitle": "CLOVER",
+      "aliases": [
+        "CLOVER"
+      ]
     },
     {
       "id": "to-day-06",
@@ -421,15 +433,23 @@
     },
     {
       "id": "from-9-01",
-      "title": "LOVE BOMB",
+      "title": "럽밤",
       "albumId": "from-9",
-      "trackNumber": 1
+      "trackNumber": 1,
+      "originalTitle": "LOVE BOMB",
+      "aliases": [
+        "LOVE BOMB"
+      ]
     },
     {
       "id": "from-9-02",
-      "title": "DANCING QUEEN",
+      "title": "댄싱 퀸",
       "albumId": "from-9",
-      "trackNumber": 2
+      "trackNumber": 2,
+      "originalTitle": "DANCING QUEEN",
+      "aliases": [
+        "DANCING QUEEN"
+      ]
     },
     {
       "id": "from-9-03",
@@ -448,9 +468,13 @@
     },
     {
       "id": "fun-factory-02",
-      "title": "LOVE RUMPUMPUM",
+      "title": "러브 럼펌펌",
       "albumId": "fun-factory",
-      "trackNumber": 2
+      "trackNumber": 2,
+      "originalTitle": "LOVE RUMPUMPUM",
+      "aliases": [
+        "LOVE RUMPUMPUM"
+      ]
     },
     {
       "id": "fun-factory-03",
@@ -460,9 +484,13 @@
     },
     {
       "id": "my-little-society-01",
-      "title": "Feel Good (SECRET CODE)",
+      "title": "Feel Good",
       "albumId": "my-little-society",
-      "trackNumber": 1
+      "trackNumber": 1,
+      "originalTitle": "Feel Good (SECRET CODE)",
+      "aliases": [
+        "Feel Good (SECRET CODE)"
+      ]
     },
     {
       "id": "my-little-society-02",
@@ -497,15 +525,23 @@
     },
     {
       "id": "9-way-ticket-01",
-      "title": "Airplane Mode",
+      "title": "에어플레인 모드",
       "albumId": "9-way-ticket",
-      "trackNumber": 1
+      "trackNumber": 1,
+      "originalTitle": "Airplane Mode",
+      "aliases": [
+        "Airplane Mode"
+      ]
     },
     {
       "id": "9-way-ticket-02",
-      "title": "WE GO",
+      "title": "위고",
       "albumId": "9-way-ticket",
-      "trackNumber": 2
+      "trackNumber": 2,
+      "originalTitle": "WE GO",
+      "aliases": [
+        "WE GO"
+      ]
     },
     {
       "id": "9-way-ticket-03",
@@ -515,9 +551,13 @@
     },
     {
       "id": "talk-and-talk-01",
-      "title": "Talk & Talk",
+      "title": "톡앤톡",
       "albumId": "talk-and-talk",
-      "trackNumber": 1
+      "trackNumber": 1,
+      "originalTitle": "Talk & Talk",
+      "aliases": [
+        "Talk & Talk"
+      ]
     },
     {
       "id": "midnight-guest-01",
@@ -551,9 +591,13 @@
     },
     {
       "id": "from-our-memento-box-01",
-      "title": "Up And",
+      "title": "업앤",
       "albumId": "from-our-memento-box",
-      "trackNumber": 1
+      "trackNumber": 1,
+      "originalTitle": "Up And",
+      "aliases": [
+        "Up And"
+      ]
     },
     {
       "id": "from-our-memento-box-02",
@@ -587,9 +631,13 @@
     },
     {
       "id": "unlock-my-world-02",
-      "title": "#menow",
+      "title": "미나우",
       "albumId": "unlock-my-world",
-      "trackNumber": 2
+      "trackNumber": 2,
+      "originalTitle": "#menow",
+      "aliases": [
+        "#menow"
+      ]
     },
     {
       "id": "unlock-my-world-03",
@@ -645,9 +693,13 @@
     },
     {
       "id": "supersonic-01",
-      "title": "Supersonic",
+      "title": "슈퍼소닉",
       "albumId": "supersonic",
-      "trackNumber": 1
+      "trackNumber": 1,
+      "originalTitle": "Supersonic",
+      "aliases": [
+        "Supersonic"
+      ]
     },
     {
       "id": "supersonic-02",
@@ -675,9 +727,13 @@
     },
     {
       "id": "from-our-20s-03",
-      "title": "Love=Disaster",
+      "title": "러브 디제스터",
       "albumId": "from-our-20s",
-      "trackNumber": 3
+      "trackNumber": 3,
+      "originalTitle": "Love=Disaster",
+      "aliases": [
+        "Love=Disaster"
+      ]
     },
     {
       "id": "from-our-20s-04",

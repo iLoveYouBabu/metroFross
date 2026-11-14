@@ -8,7 +8,18 @@ import { ChartProgress } from '../dist/chart-progress.mjs';
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const distRoot = resolve(projectRoot, 'dist');
 const physicalCategories = new Set(['album', 'ep', 'single']);
-const sourceTypes = new Set(['official', 'reported', 'unverified']);
+const sourceTypes = new Set(['official', 'reported', 'unofficial', 'unverified']);
+const chartSystems = new Set(['hanteo', 'oricon', 'unspecified']);
+const typingNames = new Map([
+  ['to-heart-01', '나에게로 오는 길'], ['to-heart-02', '투 하트'],
+  ['to-day-03', '두근두근'], ['to-day-05', '클로버'],
+  ['from-9-01', '럽밤'], ['from-9-02', '댄싱 퀸'],
+  ['fun-factory-02', '러브 럼펌펌'], ['my-little-society-01', 'Feel Good'],
+  ['9-way-ticket-01', '에어플레인 모드'], ['9-way-ticket-02', '위고'],
+  ['talk-and-talk-01', '톡앤톡'], ['from-our-memento-box-01', '업앤'],
+  ['unlock-my-world-02', '미나우'], ['supersonic-01', '슈퍼소닉'],
+  ['from-our-20s-03', '러브 디제스터']
+]);
 const digitalOnlyIds = new Set(['glass-shoes', 'from', 'white-memories']);
 
 function nonEmpty(value, label) {
@@ -26,6 +37,12 @@ function date(value, label) {
 function sevenDayEnd(start) {
   const parsed = new Date(`${start}T00:00:00.000Z`);
   parsed.setUTCDate(parsed.getUTCDate() + 6);
+  return parsed.toISOString().slice(0, 10);
+}
+
+function releaseCalendarWeekStart(releaseDate) {
+  const parsed = new Date(`${releaseDate}T00:00:00.000Z`);
+  parsed.setUTCDate(parsed.getUTCDate() - ((parsed.getUTCDay() + 6) % 7));
   return parsed.toISOString().slice(0, 10);
 }
 
@@ -75,6 +92,7 @@ async function checkCourse(course, master) {
   assert.ok(Array.isArray(course.excluded), '제외 사유 목록이 필요합니다.');
   assert.ok(Array.isArray(master.albums) && Array.isArray(master.tracks), '보존된 원본 카탈로그가 필요합니다.');
   const masterAlbums = new Map(master.albums.map(album => [album.id, album]));
+  const masterTracks = new Map(master.tracks.map(track => [track.id, track]));
   const prohibited = new Set(master.albums.filter(album => !physicalCategories.has(album.category)).map(album => album.id));
   for (const id of digitalOnlyIds) prohibited.add(id);
   const albumMap = new Map();
@@ -121,6 +139,16 @@ async function checkCourse(course, master) {
       assert.ok(Array.isArray(track.aliases), `${track.id}: 별칭은 배열이어야 합니다.`);
       track.aliases.forEach(alias => nonEmpty(alias, `${track.id} 별칭`));
     }
+    const originalTrack = masterTracks.get(track.id);
+    if (originalTrack) {
+      assert.equal(track.albumId, originalTrack.albumId, `${track.id}: 원본 앨범 ID가 바뀌었습니다.`);
+      assert.equal(track.trackNumber, originalTrack.trackNumber, `${track.id}: 원본 트랙 번호가 바뀌었습니다.`);
+      if (track.title !== originalTrack.title) {
+        assert.equal(track.originalTitle, originalTrack.title, `${track.id}: 사용자 표기를 적용해도 정확한 원제를 보존해야 합니다.`);
+        assert.ok(track.aliases?.includes(originalTrack.title), `${track.id}: 원제를 입력 별칭에도 보존해야 합니다.`);
+      }
+    }
+    if (typingNames.has(track.id)) assert.equal(track.title, typingNames.get(track.id), `${track.id}: 사용자 지정 입력 표기가 다릅니다.`);
     if (track.sources) sources(track.sources, `${track.id} 출처`);
     if (album.start === -1) album.start = index;
     album.lastTrackNumber = track.trackNumber;
@@ -134,6 +162,7 @@ async function checkCourse(course, master) {
   for (const track of master.tracks.filter(track => albumMap.has(track.albumId))) {
     assert.ok(trackIds.has(track.id), `${track.id}: 선택된 앨범의 원래 고유 곡이 사라졌습니다.`);
   }
+  for (const id of typingNames.keys()) assert.ok(trackIds.has(id), `${id}: 사용자 지정 곡이 코스에서 사라졌습니다.`);
   for (const item of course.excluded) {
     nonEmpty(item.id, '제외 항목 ID');
     nonEmpty(item.title, `${item.id} 제외 제목`);
@@ -168,7 +197,7 @@ async function checkCourse(course, master) {
 
 function checkSales(data, albumMap) {
   date(data.updatedAt, '초동 자료 확인일');
-  assert.equal(data.metric, 'reported-first-week-sales', '보도된 발매 첫 7일 판매량이라는 지표를 명시해야 합니다. 집계기관 미명시 자료를 한터 원자료로 단정하면 안 됩니다.');
+  assert.equal(data.metric, 'reported-first-week-sales', '앨범별 첫 주 판매량이라는 지표를 명시해야 합니다. 보도·비공식 자료를 한터 공식 원자료로 단정하면 안 됩니다.');
   assert.equal(data.unit, 'copies', '음반지수·순위 대신 판매 장수를 사용해야 합니다.');
   nonEmpty(data.definition, '초동 지표 정의');
   assert.match(data.definition, /7일/u, '발매일부터 7일이라는 지표 정의가 필요합니다.');
@@ -186,12 +215,27 @@ function checkSales(data, albumMap) {
     assert.ok(row.sales === null || (Number.isSafeInteger(row.sales) && row.sales > 0), `${row.albumId}: 판매량은 양의 정수 또는 null이어야 합니다. 0은 미확인 표시가 아닙니다.`);
     assert.equal(typeof row.approximate, 'boolean', `${row.albumId}: approximate는 boolean이어야 합니다.`);
     assert.ok(sourceTypes.has(row.sourceType), `${row.albumId}: 알 수 없는 출처 유형입니다.`);
+    assert.ok(chartSystems.has(row.chartSystem), `${row.albumId}: 집계기관을 구분해야 합니다.`);
+    assert.ok(['release-first-seven-days', 'oricon-first-week'].includes(row.metric), `${row.albumId}: 집계 지표를 명시해야 합니다.`);
+    nonEmpty(row.metricLabel, `${row.albumId} 집계 표시명`);
     sources(row.sources, `${row.albumId} 초동 출처`, true);
     nonEmpty(row.note, `${row.albumId} 집계 설명`);
+    if (row.sourceType === 'unofficial') assert.match(row.note, /비공식/u, `${row.albumId}: 비공식 수치를 공식 확인값으로 설명하면 안 됩니다.`);
+    if (row.metric === 'oricon-first-week') {
+      assert.equal(row.albumId, 'like-you-better-japanese', '다른 앨범에 일본 EP의 오리콘 주간 예외를 적용하면 안 됩니다.');
+      assert.equal(row.chartSystem, 'oricon');
+      assert.equal(row.metricLabel, '오리콘 첫 주');
+      assert.ok(row.sources.some(source => new URL(source.url).hostname.endsWith('oricon.co.jp')), '오리콘 주간 기간을 확인할 공식 출처가 필요합니다.');
+    } else {
+      assert.notEqual(row.chartSystem, 'oricon', `${row.albumId}: 오리콘과 발매 첫 7일 지표를 혼동하면 안 됩니다.`);
+      assert.equal(row.metricLabel, '발매 첫 7일');
+    }
     if (row.sales !== null) {
-      assert.ok(row.sourceType === 'official' || row.sourceType === 'reported', `${row.albumId}: 미확인 출처로 판매량을 확정할 수 없습니다.`);
-      assert.equal(date(row.periodStart, `${row.albumId} 초동 시작일`), album.date, `${row.albumId}: 초동은 최초 발매일부터 시작해야 합니다.`);
-      assert.equal(date(row.periodEnd, `${row.albumId} 초동 종료일`), sevenDayEnd(album.date), `${row.albumId}: 발매일 포함 정확히 7일이어야 합니다.`);
+      assert.ok(['official', 'reported', 'unofficial'].includes(row.sourceType), `${row.albumId}: 미확인 출처로 판매량을 확정할 수 없습니다.`);
+      const expectedStart = row.metric === 'oricon-first-week' ? releaseCalendarWeekStart(album.date) : album.date;
+      assert.equal(date(row.periodStart, `${row.albumId} 집계 시작일`), expectedStart, `${row.albumId}: 명시한 집계 지표의 시작일과 다릅니다.`);
+      assert.equal(date(row.periodEnd, `${row.albumId} 집계 종료일`), sevenDayEnd(expectedStart), `${row.albumId}: 명시한 집계 지표의 정확한 7일이어야 합니다.`);
+      if (row.metric === 'oricon-first-week') assert.match(row.note, /달력 주간/u, '오리콘은 발매일부터 연속 7일이 아닌 달력 주간임을 설명해야 합니다.');
     } else {
       assert.equal(row.sourceType, 'unverified', `${row.albumId}: null 판매량은 unverified로 명시해야 합니다.`);
       assert.equal(row.approximate, false, `${row.albumId}: 미확인은 근사치가 아닙니다.`);
@@ -362,9 +406,12 @@ async function main() {
   const integration = checkIntegration(course, albumMap, rows);
   const records = [...rows.values()];
   const known = records.filter(row => row.sales !== null);
+  const unofficial = known.filter(row => row.sourceType === 'unofficial');
+  const oricon = records.filter(row => row.metric === 'oricon-first-week');
   console.log(`차트 자료 검사 통과: 실물 ${course.albums.length}앨범 · ${course.tracks.length}곡 · 재킷 ${course.albums.length}장`);
-  console.log(`초동 ID 1:1 · 판매량 ${known.length}건(근사치 ${known.filter(row => row.approximate).length}) · 미확인 ${records.length - known.length}건(null) · 첫 7일 기간 검사 통과`);
-  console.log(`전체 원제 완주 ${integration.expectedStrokes}타 · 앨범 경계 ${integration.checkedBoundaries}회 · prefix/정지/오타/Backspace/일시정지/완주 고정 통과`);
+  console.log(`판매량 ID 1:1 · 수치 ${known.length}건(근사치 ${known.filter(row => row.approximate).length}, 비공식 ${unofficial.length}) · 미확인 ${records.length - known.length}건(null)`);
+  console.log(`기간 검사 통과: 발매 첫 7일 ${records.length - oricon.length}건 · 오리콘 달력 첫 주 ${oricon.length}건${oricon.map(row => ` (${row.periodStart}~${row.periodEnd})`).join('')}`);
+  console.log(`전체 입력 표기 완주 ${integration.expectedStrokes}타 · 사용자 표기 ${typingNames.size}곡 · 앨범 경계 ${integration.checkedBoundaries}회 · prefix/정지/오타/Backspace/일시정지/완주 고정 통과`);
   console.log(`이동 위치 분리: 보간 ${integration.interpolated}회 · 미확인 ${integration.unknown}회 · 가상 완주 꼬리 ${integration.finishTail}회 · 판매 관측값 불변`);
 }
 
