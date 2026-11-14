@@ -15,7 +15,7 @@ const clock = () => performance.now();
 let safeStorage;try{safeStorage=localStorage;}catch{}
 const personalRecords=createPersonalRecords(safeStorage);
 let catalog, salesData, albums, courseTracks, session, chartModel, chartView, signature, inputController;
-let courseCatalog, fullCourse, activeCourse, previewCourse, selectedIds=new Set(), recordsPanel, rankingConfig={enabled:false}, rankingClient=createRankingClient({enabled:false}), runContext;
+let courseCatalog, fullCourse, activeCourse, previewCourse, selectedIds=new Set(), recordsPanel, rankingConfig={enabled:false}, rankingClient=createRankingClient({enabled:false}), runContext, currentNickname='';
 let best = null, lastResult = null, shownAlbum = null, lastFinished = false, overview = false;
 let catalogWasRunning = false, restartWasRunning = false, restartAction = 'restart', tick = null, phase = 'home';
 for(const id of ['home-screen','game-screen','home-albums','home-course-count','home-best','start-button','countdown-overlay','countdown-number','sales-label','load-error'])ui[id]=byId(id);
@@ -28,8 +28,8 @@ function deviceCategory(){return matchMedia('(pointer:coarse)').matches?'mobile'
 function uniqueId(){return crypto.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;}
 function nicknameError(text){ui['nickname-status'].textContent=text;ui['nickname-status'].classList.toggle('has-error',Boolean(text));ui['nickname-input'].setAttribute('aria-invalid',String(Boolean(text)));}
 function nicknameValue(){return normalizeNickname(ui['nickname-input'].value);}
-function saveNicknameLocally(value){writeStorage('fromis-player-profile-v1',{nickname:value});ui['nickname-input'].value=value;nicknameError('');ui['nickname-status'].textContent='닉네임을 이 기기에 저장했어요.';}
-byId('save-nickname').addEventListener('click',async()=>{let nickname;try{nickname=nicknameValue();}catch(error){nicknameError(error.message);return;}saveNicknameLocally(nickname);const button=byId('save-nickname');button.disabled=true;try{await rankingClient.setNickname(nickname);ui['nickname-status'].textContent='닉네임을 저장했어요.';recordsPanel?.refresh();}catch{ui['nickname-status'].textContent='이 기기에 저장했어요. 온라인 연결은 준비 중이에요.';}finally{button.disabled=false;}});
+function saveNicknameLocally(value){currentNickname=value;writeStorage('fromis-player-profile-v1',{nickname:value});rankingClient.useNickname?.(value);ui['nickname-input'].value=value;nicknameError('');ui['nickname-status'].textContent='같은 닉네임의 기록은 하나로 묶여요.';}
+byId('save-nickname').addEventListener('click',async()=>{let nickname;try{nickname=nicknameValue();}catch(error){nicknameError(error.message);return;}saveNicknameLocally(nickname);renderBest();recordsPanel?.refresh();const button=byId('save-nickname');button.disabled=true;try{await rankingClient.setNickname(nickname);ui['nickname-status'].textContent='닉네임을 저장했어요.';recordsPanel?.refresh();}catch{ui['nickname-status'].textContent='이 기기에 저장했어요. 온라인 연결은 준비 중이에요.';}finally{button.disabled=false;}});
 ui['nickname-input'].addEventListener('input',()=>nicknameError(''));
 function updatePicker(){
   for(const checkbox of ui['home-albums'].querySelectorAll('input'))checkbox.checked=selectedIds.has(checkbox.value);
@@ -150,7 +150,7 @@ byId('cancel-restart').addEventListener('click',()=>ui['restart-dialog'].close()
 byId('confirm-restart').addEventListener('click',()=>{restartWasRunning=false;ui['restart-dialog'].close();if(restartAction==='home')showHome();else beginRun();});
 ui['restart-dialog'].addEventListener('close',()=>{if(restartWasRunning)resume();restartWasRunning=false;});
 byId('replay-button').addEventListener('click',()=>beginRun());
-function renderBest(){const course=phase==='home'?previewCourse:activeCourse;best=course?bestForCourse(personalRecords.list(),course.signature,deviceCategory()):null;const text=best?`이 코스 개인 최고 ${formatTime(best.elapsedMs,true)}`:'';ui['best-record'].textContent=text;ui['home-best'].textContent=text;recordsPanel?.summary();}
+function renderBest(){const course=phase==='home'?previewCourse:activeCourse;best=course?bestForCourse(personalRecords.list(),course.signature,deviceCategory(),currentNickname):null;const text=best?`이 코스 개인 최고 ${formatTime(best.elapsedMs,true)}`:'';ui['best-record'].textContent=text;ui['home-best'].textContent=text;recordsPanel?.summary();}
 
 const countdown=createCountdown({onTick:number=>{const digit=document.createElement('span');digit.className='countdown-digit';digit.textContent=String(number);ui['countdown-number'].replaceChildren(digit);},onDone:()=>{if(phase!=='countdown'||document.hidden)return;runContext.onlineEligible=Boolean(runContext.course.isFullCourse&&runContext.ticketReady&&runContext.ticket?.eligible);phase='game';ui['countdown-overlay'].hidden=true;render(session.start(clock()));focusInput();announce('시작! 보이는 제목을 따라 입력해주세요.');}});
 function beginRun(){if(!previewCourse)return;let nickname;try{nickname=nicknameValue();}catch(error){nicknameError(error.message);ui['nickname-input'].focus();return;}saveNicknameLocally(nickname);countdown.cancel();inputController?.cancel();phase='countdown';document.body.classList.remove('is-home');ui['home-screen'].hidden=true;ui['game-screen'].hidden=false;prepareCourse(previewCourse);runContext=createRunContext(nickname);reset({focus:false});ui['countdown-overlay'].hidden=false;input.disabled=false;input.readOnly=false;input.focus({preventScroll:true});updateViewport();countdown.start();}
@@ -164,7 +164,7 @@ function finish(state) {
   ui['journey-label'].textContent=`${activeCourse.albums.length}앨범 · ${courseTracks.length}곡 완주`;ui['progress-percentage'].textContent='100%';ui['progress-fill'].style.width='100%';
   ui['course-progress'].setAttribute('aria-valuenow','100');ui['course-progress'].setAttribute('aria-valuetext','모든 앨범 완주');
   updateViewport();if(lastFinished)return;lastFinished=true;
-  const context=runContext,previous=bestForCourse(personalRecords.list(),signature,context.device),record={id:uniqueId(),signature,courseVersion:rankingConfig.courseVersion||'local',albumIds:[...activeCourse.albumIds],albumTitles:activeCourse.albums.map(album=>album.title),trackCount:courseTracks.length,isFullCourse:activeCourse.isFullCourse,device:context.device,nickname:context.nickname,elapsedMs:state.stats.elapsedMs,cpm:Math.round(state.stats.cpm),accuracy:Number(state.stats.accuracy.toFixed(1)),completedAt:new Date().toISOString()};
+  const context=runContext,previous=bestForCourse(personalRecords.list(),signature,context.device,context.nickname),record={id:uniqueId(),signature,courseVersion:rankingConfig.courseVersion||'local',albumIds:[...activeCourse.albumIds],albumTitles:activeCourse.albums.map(album=>album.title),trackCount:courseTracks.length,isFullCourse:activeCourse.isFullCourse,device:context.device,nickname:context.nickname,elapsedMs:state.stats.elapsedMs,cpm:Math.round(state.stats.cpm),accuracy:Number(state.stats.accuracy.toFixed(1)),completedAt:new Date().toISOString()};
   const isBest=!previous||record.elapsedMs<previous.elapsedMs;personalRecords.add(record);lastResult=record;
   ui['result-description'].textContent=`${activeCourse.albums.length}개 앨범의 ${courseTracks.length}곡을 발매순으로 완주했어요.${activeCourse.isFullCourse?'':' 선택 앨범 연습 코스예요.'}`;
   ui['result-time'].textContent=formatTime(record.elapsedMs,true);ui['result-cpm'].textContent=String(record.cpm);ui['result-accuracy'].textContent=`${record.accuracy}%`;
@@ -177,7 +177,7 @@ async function saveCompletionRanking(record,state,context){
   if(!context.course.isFullCourse){show('선택 앨범 연습 기록은 개인 기록에 저장했어요. 주간·전체 랭킹에는 포함되지 않아요.');return;}
   if(!context.onlineEligible){show('온라인 랭킹 연결을 완료하지 못했어요. 개인 기록은 이 기기에 저장했어요.');return;}
   show('전체 코스 기록을 랭킹에 저장하고 있어요.');
-  try{const result=await context.client.finishRun({runId:context.ticket.run_id,fullCourse:context.course.isFullCourse,completedTrackCount:state.progress.completed,elapsedMs:record.elapsedMs,correctStrokes:state.stats.correctStrokes,attemptedStrokes:state.stats.attemptedStrokes});if(result.eligible){personalRecords.uploaded(record.id,context.ticket.run_id);show('전체 코스 기록을 주간·전체 랭킹에 남겼어요.');if(phase==='home')recordsPanel?.refresh();}else show('이 기록은 개인 기록에만 저장했어요.');}catch{show('온라인 랭킹에 저장하지 못했어요. 개인 기록은 이 기기에 저장했어요.');}
+  try{const result=await context.client.finishRun({runId:context.ticket.run_id,runToken:context.ticket.run_token,fullCourse:context.course.isFullCourse,completedTrackCount:state.progress.completed,elapsedMs:record.elapsedMs,correctStrokes:state.stats.correctStrokes,attemptedStrokes:state.stats.attemptedStrokes});if(result.eligible){personalRecords.uploaded(record.id,context.ticket.run_id);show('전체 코스 기록을 주간·전체 랭킹에 남겼어요.');if(phase==='home')recordsPanel?.refresh();}else show('이 기록은 개인 기록에만 저장했어요.');}catch{show('온라인 랭킹에 저장하지 못했어요. 개인 기록은 이 기기에 저장했어요.');}
 }
 byId('copy-button').addEventListener('click',async()=>{
   if(!lastResult)return;const text=`fromis_9 chart journey\n${lastResult.albumIds.length}앨범 · ${lastResult.trackCount}곡 ${lastResult.isFullCourse?'전체 완주':'연습 완주'} · ${formatTime(lastResult.elapsedMs,true)}\n${lastResult.cpm}타 · 정확도 ${lastResult.accuracy}%\n${location.href.split('?')[0]}`;
@@ -219,13 +219,13 @@ async function initialize() {
     albums=new Map(chartAlbums.map(album=>[album.id,album]));courseCatalog={...catalog,albums:chartAlbums};fullCourse=buildCourse(courseCatalog);
     prepareCourse(fullCourse);
     inputController=attachInputController({input,session:()=>session,now:clock,onState:render,onAnnounce:announce,canInput:()=>phase==='game'&&!ui['catalog-dialog'].open&&!ui['restart-dialog'].open});
-    let nickname=readStorage('fromis-player-profile-v1')?.nickname;try{nickname=normalizeNickname(nickname);}catch{nickname=`플로버${Math.floor(Math.random()*9000+1000)}`;}ui['nickname-input'].value=nickname;writeStorage('fromis-player-profile-v1',{nickname});
+    let nickname=readStorage('fromis-player-profile-v1')?.nickname;try{nickname=normalizeNickname(nickname);}catch{nickname=`플로버${Math.floor(Math.random()*9000+1000)}`;}currentNickname=nickname;ui['nickname-input'].value=nickname;writeStorage('fromis-player-profile-v1',{nickname});
     const storedSelection=readStorage('fromis-selected-albums-v1');selectedIds=new Set(Array.isArray(storedSelection)?storedSelection.filter(id=>albums.has(id)):chartAlbums.map(album=>album.id));
     const choices=document.createDocumentFragment();chartAlbums.forEach(album=>{const label=document.createElement('label');label.className='album-choice';label.title=album.title;const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=album.id;checkbox.setAttribute('aria-label',`${album.title} 선택`);const frame=document.createElement('span');frame.className='choice-cover';const image=document.createElement('img');image.src=album.cover;image.alt='';image.width=62;image.height=62;frame.append(image);const title=document.createElement('span');title.className='choice-title';title.textContent=album.title;label.append(checkbox,frame,title);choices.append(label);});ui['home-albums'].replaceChildren(choices);
     try{const response=await fetch('./data/ranking-config.json');if(response.ok)rankingConfig=await response.json();}catch{}
-    if(rankingConfig.catalogHash&&await catalogFingerprint(catalog)===rankingConfig.catalogHash)rankingClient=createRankingClient({...rankingConfig,device:deviceCategory()});
+    if(rankingConfig.catalogHash&&await catalogFingerprint(catalog)===rankingConfig.catalogHash)rankingClient=createRankingClient({...rankingConfig,device:deviceCategory(),nickname});
     const legacy=readStorage('fromis-chart-best-v2');if(!personalRecords.list().length&&legacy?.signature===catalog.tracks.map(track=>`${track.id}:${normalizeTitle(track.title)}`).join('|')){try{personalRecords.add({...legacy,id:`legacy-${legacy.completedAt}`,signature:fullCourse.signature,courseVersion:'legacy',albumIds:[...fullCourse.albumIds],albumTitles:fullCourse.albums.map(album=>album.title),trackCount:fullCourse.trackCount,isFullCourse:true,device:deviceCategory(),nickname});}catch{}}
-    recordsPanel=createHomeRecords({client:rankingClient,records:personalRecords,fullSignature:fullCourse.signature,currentDevice:deviceCategory()});
+    recordsPanel=createHomeRecords({client:rankingClient,records:personalRecords,fullSignature:fullCourse.signature,currentDevice:deviceCategory(),getNickname:()=>currentNickname});
     ui['catalog-scope'].textContent=catalog.scope;ui['sales-definition'].textContent=salesData.definition;
     ui['excluded-summary'].textContent=`제외 발매: ${(catalog.excluded||[]).map(item=>item.title||item.id).join(', ')}`;
     ui['catalog-updated'].textContent=`목록·자료 확인: ${salesData.updatedAt}`;

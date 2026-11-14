@@ -20,6 +20,6 @@ export async function catalogFingerprint(catalog) {
   return [...new Uint8Array(hash)].map(byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
-export function bestForCourse(records, signature, device) {
-  return records.filter(record => record.signature === signature && record.device === device && Number.isFinite(record.elapsedMs) && record.elapsedMs > 0).sort((a, b) => a.elapsedMs - b.elapsedMs)[0] || null;
+export function bestForCourse(records, signature, device, nickname) {
+  return records.filter(record => record.signature === signature && record.device === device && (nickname === undefined || record.nickname === nickname) && Number.isFinite(record.elapsedMs) && record.elapsedMs > 0).sort((a, b) => a.elapsedMs - b.elapsedMs)[0] || null;
 }

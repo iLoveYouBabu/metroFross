@@ -44,13 +44,13 @@ test('the main screen boots, partial play stays local, and a full completion alo
     if (url === './data/first-week-sales.json') return result(sales);
     if (url === './data/ranking-config.json') return result(config);
     const body = JSON.parse(options.body || '{}'); requests.push({ url, body });
-    if (url.endsWith('/auth/v1/signup')) return result({ access_token: 'fixture-access', refresh_token: 'fixture-refresh', expires_in: 3600, user: { id: 'fixture-user' } });
+    if (url.includes('/auth/')) throw new Error('Nickname mode must not call Supabase Auth');
     if (!backendReady) return result({ code: 'PGRST202' }, false);
-    if (url.endsWith('/fromis_leaderboard')) return result([]);
-    if (url.endsWith('/fromis_set_nickname')) return result({ nickname: body.p_nickname });
-    if (url.endsWith('/fromis_begin_run')) return result({ eligible: true, run_id: 'fixture-run' });
-    if (url.endsWith('/fromis_finish_run')) return result({ eligible: true, record: { run_id: 'fixture-run' } });
-    if (url.endsWith('/fromis_personal_records')) return result({ best: null, recent: [] });
+    if (url.endsWith('/fromis_nickname_leaderboard')) return result([]);
+    if (url.endsWith('/fromis_nickname_set')) return result({ nickname: body.p_nickname });
+    if (url.endsWith('/fromis_nickname_begin')) return result({ eligible: true, run_id: 'fixture-run',run_token:'fixture-proof' });
+    if (url.endsWith('/fromis_nickname_finish')) return result({ eligible: true, record: { run_id: 'fixture-run' } });
+    if (url.endsWith('/fromis_nickname_personal')) return result({ best: null, recent: [] });
     throw new Error('Unexpected fixture request');
   };
   const replacements = { document: documentFixture, window: Object.assign(new Element('window'), { visualViewport: null }), localStorage: storage, fetch: fakeFetch, performance: { now: () => now }, innerWidth: 1000, innerHeight: 800, matchMedia: () => ({ matches: false }), requestAnimationFrame: callback => callback(), setTimeout: schedule, clearTimeout: id => timers.delete(id), setInterval: () => 1, clearInterval: () => {} };
@@ -71,15 +71,19 @@ test('the main screen boots, partial play stays local, and a full completion alo
     const input = nodes.get('typing-input');
     for (const track of course.tracks.filter(track => track.albumId === 'from-9')) { advance(1000); input.value = track.title; input.emit('input'); }
     await settle(); assert.equal(nodes.get('result-panel').hidden, false); assert.match(nodes.get('ranking-result-status').textContent, /랭킹에는 포함되지/u);
-    assert.equal(requests.filter(request => /fromis_begin_run|fromis_finish_run|auth\/v1\/signup/u.test(request.url)).length, 0);
+    assert.equal(requests.filter(request => /fromis_nickname_begin|fromis_nickname_finish|\/auth\//u.test(request.url)).length, 0);
     nodes.get('home-button').emit('click'); nodes.get('records-personal').emit('click'); await settle(); assert.match(nodes.get('records-content').textContent, /연습 완주/u);
+    nodes.get('nickname-input').value='다른플로버';nodes.get('save-nickname').emit('click');await settle();assert.doesNotMatch(nodes.get('records-content').textContent,/연습 완주/u);
+    nodes.get('nickname-input').value='테스트플로버';nodes.get('save-nickname').emit('click');await settle();assert.match(nodes.get('records-content').textContent,/연습 완주/u);
     backendReady = true; nodes.get('select-all-albums').emit('click'); nodes.get('start-button').emit('click'); await settle(); advance(3000);
     for (const track of course.tracks) { advance(1000); input.value = track.title; input.emit('input'); }
     await settle();
     assert.match(nodes.get('ranking-result-status').textContent, /랭킹에 남겼/u);
-    const submissions = requests.filter(request => request.url.endsWith('/fromis_finish_run'));
+    const submissions = requests.filter(request => request.url.endsWith('/fromis_nickname_finish'));
     assert.equal(submissions.length, 1); assert.equal(submissions[0].body.p_completed_track_count, 67);
-    assert.equal(requests.filter(request => request.url.endsWith('/fromis_begin_run')).length, 1);
+    assert.equal(submissions[0].body.p_run_token,'fixture-proof');
+    assert.equal(requests.filter(request => request.url.endsWith('/fromis_nickname_begin')).length, 1);
+    assert.equal(requests.filter(request => request.url.includes('/auth/')).length,0);
     const records = JSON.parse(storage.getItem('fromis-personal-records-v1')); assert.equal(records.length, 2); assert.equal(records.filter(record => record.isFullCourse).length, 1);
   } finally { for (const [key, descriptor] of original) { if (descriptor) Object.defineProperty(globalThis, key, descriptor); else delete globalThis[key]; } }
 });

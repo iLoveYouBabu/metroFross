@@ -15,6 +15,9 @@ test('empty and unknown selections are rejected and course records stay separate
   assert.notEqual(full.signature, partial.signature);
   const records = [{ signature: full.signature, device: 'desktop', elapsedMs: 120 }, { signature: partial.signature, device: 'desktop', elapsedMs: 10 }, { signature: full.signature, device: 'mobile', elapsedMs: 90 }];
   assert.equal(bestForCourse(records, full.signature, 'desktop').elapsedMs, 120);
+  const names = records.map((record,index)=>({...record,nickname:index?'다른닉':'내닉'}));
+  names.push({...records[0],nickname:'다른닉',elapsedMs:1});
+  assert.equal(bestForCourse(names,full.signature,'desktop','내닉').elapsedMs,120);
 });
 test('the catalog fingerprint covers the complete ordered title and alias rules', async () => {
   const real = JSON.parse(await readFile(new URL('../dist/data/album-course.json', import.meta.url), 'utf8'));

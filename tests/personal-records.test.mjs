@@ -13,3 +13,8 @@ test('malformed storage and invalid completion values do not create personal rec
   const disk = storage(); disk.setItem('fromis-personal-records-v1', '{invalid'); const rows = createPersonalRecords(disk);
   assert.deepEqual(rows.list(), []); assert.throws(() => rows.add({ ...record('bad'), elapsedMs: 0 }), TypeError);
 });
+
+test('blocked browser storage still retains records for the current page session',()=>{
+  const rows=createPersonalRecords({getItem(){throw new Error('blocked');},setItem(){throw new Error('blocked');}});
+  rows.add(record('in-memory'));assert.equal(rows.list()[0].id,'in-memory');rows.uploaded('in-memory','run-id');assert.equal(rows.list()[0].uploaded,true);
+});

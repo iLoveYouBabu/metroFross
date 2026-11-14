@@ -4,14 +4,14 @@ const time = value => { const tenths = Math.max(0, Math.floor(Number(value) / 10
 const date = value => { try { return new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(value)); } catch { return ''; } };
 const node = (tag, className, text) => { const item = document.createElement(tag); if (className) item.className = className; if (text !== undefined) item.textContent = text; return item; };
 
-export function createHomeRecords({ client, records, fullSignature, currentDevice }) {
+export function createHomeRecords({ client, records, fullSignature, currentDevice, getNickname }) {
   const byId = id => document.getElementById(id);
   const content = byId('records-content'), status = byId('ranking-connection-status'), device = byId('ranking-device');
   const tabs = [...document.querySelectorAll('.record-tabs [role=tab]')];
   let period = 'week', requestId = 0;
   device.value = currentDevice;
   function summary(remoteBest = null) {
-    const rows = records.list().filter(row => row.device === device.value);
+    const rows = records.list().filter(row => row.device === device.value && row.nickname === getNickname());
     const local = bestForCourse(rows, fullSignature, device.value);
     const values = [local?.elapsedMs, remoteBest?.elapsed_ms].filter(value => Number.isFinite(value) && value > 0);
     byId('personal-best-time').textContent = values.length ? time(Math.min(...values)) : '—';
@@ -20,7 +20,7 @@ export function createHomeRecords({ client, records, fullSignature, currentDevic
   function showRows(rows, personal = false) {
     const list = node('ol', 'record-list');
     for (const [index, row] of rows.entries()) {
-      const item = node('li', `record-row${row.is_me ? ' is-me' : ''}`);
+      const item = node('li', `record-row${row.is_me || row.nickname === getNickname() ? ' is-me' : ''}`);
       item.append(node('span', 'record-place', personal ? '—' : String(row.rank ?? index + 1)));
       const copy = node('div');
       const title = node('div', 'record-name', personal ? (row.isFullCourse ? '전체 앨범 완주' : `${row.albumIds?.length || 0}앨범 연습 완주`) : row.nickname);
@@ -38,25 +38,26 @@ export function createHomeRecords({ client, records, fullSignature, currentDevic
     const id = ++requestId, selectedDevice = device.value; summary();
     byId('records-period-label').textContent = period === 'week' ? '최근 7일 · 전체 코스' : period === 'all' ? '전체 기간 · 전체 코스' : '선택 코스 포함 · 내 완주 기록';
     if (period === 'personal') {
-      const local = records.list().filter(row => row.device === selectedDevice);
+      const local = records.list().filter(row => row.device === selectedDevice && row.nickname === getNickname());
       if (local.length) showRows(local.slice(0, 12), true); else empty('이 기기에 아직 완주 기록이 없어요. 앨범을 골라 첫 여정을 시작해요.');
       status.textContent = '선택 앨범의 연습 기록도 이 기기에 남아요.';
       try {
-        const remote = await client.personal({ device: selectedDevice });
+        const remote = await client.personal({ device: selectedDevice, nickname: getNickname() });
         if (id !== requestId) return; summary(remote.best);
         const remoteRows = (remote.recent || []).filter(row => !local.some(record => record.rankRunId === row.run_id || (record.elapsedMs === row.elapsed_ms && Math.abs(Date.parse(record.completedAt) - Date.parse(row.finished_at)) < 10000))).map(row => ({ ...row, isFullCourse: true, albumIds: [], completedAt: row.finished_at, elapsedMs: row.elapsed_ms }));
         const merged = [...local, ...remoteRows].sort((a, b) => Date.parse(b.completedAt) - Date.parse(a.completedAt)).slice(0, 12);
         if (merged.length) showRows(merged, true);
-        status.textContent = '온라인 전체 코스 기록과 이 기기의 연습 기록이에요.';
-      } catch (error) { if (id !== requestId) return; if (error.code !== 'identity-required') status.textContent = '온라인 기록 연결 준비 중 · 이 기기 기록은 계속 저장돼요.'; }
+        status.textContent = '같은 닉네임의 온라인 기록과 이 기기의 연습 기록이에요.';
+      } catch (error) { if (id !== requestId) return; status.textContent = '온라인 기록 연결 준비 중 · 이 기기 기록은 계속 저장돼요.'; }
       return;
     }
     empty('랭킹을 불러오고 있어요.'); status.textContent = '';
+    client.personal({ device: selectedDevice, nickname: getNickname() }).then(remote => { if (id === requestId) summary(remote.best); }).catch(() => {});
     try {
-      const rows = await client.leaderboard({ period, device: selectedDevice, limit: period === 'week' ? 10 : 20 });
+      const rows = await client.leaderboard({ period, device: selectedDevice, nickname: getNickname(), limit: period === 'week' ? 10 : 20 });
       if (id !== requestId) return;
       if (rows.length) showRows(rows); else empty('아직 등록된 전체 코스 기록이 없어요. 첫 완주 기록을 남겨봐요.');
-      status.textContent = '플레이어별 최고 기록 · PC/모바일 구분';
+      status.textContent = '닉네임별 최고 기록 · PC/모바일 구분';
     } catch (error) {
       if (id !== requestId) return;
       const preparing = ['not-configured', 'backend-not-ready', 'auth-not-enabled'].includes(error.code);
