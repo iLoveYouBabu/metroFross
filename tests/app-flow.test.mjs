@@ -55,7 +55,7 @@ test('the main screen boots, partial play stays local, and a full completion alo
     if (!backendReady) return result({ code: 'PGRST202' }, false);
     if (url.endsWith('/fromis_nickname_leaderboard')) return result([]);
     if (url.endsWith('/fromis_nickname_submit')) return result({ eligible: true, record: { run_id: body.p_id } });
-    if (url.endsWith('/fromis_nickname_personal')) return result({ best: null, recent: [] });
+    if (url.endsWith('/fromis_nickname_personal')) throw new Error('Personal records must never be fetched online');
     throw new Error('Unexpected fixture request');
   };
   const replacements = { document: documentFixture, window: Object.assign(new Element('window'), { visualViewport: null }), localStorage: storage, fetch: fakeFetch, performance: { now: () => now }, innerWidth: 1000, innerHeight: 800, matchMedia: () => ({ matches: false }), requestAnimationFrame: callback => callback(), setTimeout: schedule, clearTimeout: id => timers.delete(id), setInterval: () => 1, clearInterval: () => {} };
@@ -89,7 +89,9 @@ test('the main screen boots, partial play stays local, and a full completion alo
     for (const track of course.tracks.filter(track => track.albumId === 'from-9')) { advance(1000); const input=nodes.get('typing-input');input.value = track.title; input.emit('input');assert.notEqual(nodes.get('typing-input'),input);assert.equal(submitRequests().length,0); }
     await settle(); assert.equal(nodes.get('result-panel').hidden, false); assert.match(nodes.get('ranking-result-status').textContent, /랭킹에는 포함되지/u);
     assert.equal(submitRequests().length,0,'a completed practice game stays local');
-    nodes.get('home-button').emit('click'); nodes.get('records-personal').emit('click'); await settle(); assert.match(nodes.get('records-content').textContent, /연습 완주/u);
+    nodes.get('home-button').emit('click');const requestsBeforePersonal=requests.length;nodes.get('records-personal').emit('click');await settle();assert.match(nodes.get('records-content').textContent,/연습 완주/u);
+    assert.equal(requests.length,requestsBeforePersonal,'opening personal records makes no network request');
+    assert.match(nodes.get('ranking-connection-status').textContent,/이 브라우저에 저장된 기록만/u);
     nodes.get('nickname-input').value='ㄷㄹㅂ';nodes.get('nickname-input').emit('blur');await settle();assert.doesNotMatch(nodes.get('records-content').textContent,/연습 완주/u);
     nodes.get('nickname-input').value='ㅌㅅㅌ123';nodes.get('nickname-input').emit('change');await settle();assert.match(nodes.get('records-content').textContent,/연습 완주/u);
     backendReady = true; nodes.get('select-all-albums').emit('click'); nodes.get('start-button').emit('click');
@@ -132,6 +134,7 @@ test('the main screen boots, partial play stays local, and a full completion alo
     assert.equal(nodes.has('save-nickname'),false);
     assert.equal(nodes.has('play-button'),false);
     assert.equal(requests.filter(request => request.url.includes('/auth/')).length,0);
+    assert.equal(requests.filter(request=>request.url.endsWith('/fromis_nickname_personal')).length,0,'no screen requests online personal history');
     const records = JSON.parse(storage.getItem('fromis-personal-records-v1')); assert.equal(records.length, 2); assert.equal(records.filter(record => record.isFullCourse).length, 1);
     const fullRecord=records.find(record=>record.isFullCourse);assert.equal(fullRecord.elapsedMs,79000);assert.equal(fullRecord.id,submissions[0].body.p_id);assert.equal(fullRecord.rankRunId,fullRecord.id);
   } finally { for (const [key, descriptor] of original) { if (descriptor) Object.defineProperty(globalThis, key, descriptor); else delete globalThis[key]; } }

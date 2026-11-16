@@ -34,37 +34,42 @@ test('missing nickname SQL is an explicit setup error, not an empty leaderboard'
   assert.equal(f.calls[0].options.headers.apikey,base.publishableKey);
 });
 
-test('leaderboard passes the current nickname only for highlighting actual records',async()=>{
-  const rows=[{rank:1,nickname:'ㅍㄹㅂ',elapsed_ms:123456,cpm:350,accuracy:99,is_me:true}];
+test('public leaderboard reads send only the period, device and limit',async()=>{
+  const rows=[{rank:1,nickname:'ㅍㄹㅂ',elapsed_ms:123456,cpm:350,accuracy:99,is_me:false}];
   const f=fixture([reply(rows)]);
   assert.deepEqual(await f.client.leaderboard({period:'all',device:'mobile'}),rows);
-  assert.deepEqual(f.calls[0].body,{p_period:'all',p_device:'mobile',p_limit:10,p_nickname:'ㅍㄹㅂ'});
+  assert.deepEqual(f.calls[0].body,{p_period:'all',p_device:'mobile',p_limit:10});
 });
 
 test('nickname selection stays local without registering a profile or creating an Auth session',()=>{
   const f=fixture();
   assert.equal(f.client.setNickname,undefined);
+  assert.equal(f.client.personal,undefined);
   assert.equal(f.client.startRun,undefined);assert.equal(f.client.courseVersion,undefined);assert.equal(f.client.configured,true);
   assert.equal(f.client.useNickname(' ㅍㄹㅂ1! '),'ㅍㄹㅂ1!');
   assert.equal(f.calls.length,0);
   assert.equal(f.client.getNickname(),'ㅍㄹㅂ1!');assert.deepEqual(f.storageCalls,[]);
 });
 
-test('local nickname selection changes the personal lookup without any profile write',async()=>{
-  const result={nickname:'ㄷㄹㅂ',best:null,weekBest:null,completedRuns:0,recent:[]};
-  const f=fixture([reply(result)]);
-  assert.equal(f.client.useNickname('ㄷㄹㅂ'),'ㄷㄹㅂ');assert.equal(f.calls.length,0);
-  assert.deepEqual(await f.client.personal(),result);
-  assert.match(f.calls[0].url,/\/rpc\/fromis_nickname_personal$/u);assert.deepEqual(f.calls[0].body,{p_device:'pc',p_nickname:'ㄷㄹㅂ'});
+test('stored and explicitly supplied nicknames never leave the client on ranking reads',async()=>{
+  const f=fixture([reply([]),reply([]),reply([])]);
+  assert.deepEqual(await f.client.leaderboard({period:'week'}),[]);
+  assert.equal(f.client.useNickname('ㄷㄹㅂ'),'ㄷㄹㅂ');assert.equal(f.calls.length,1);
+  assert.deepEqual(await f.client.leaderboard({period:'week'}),[]);
+  // Cached callers may still pass this option; it is ignored rather than sent or validated.
+  assert.deepEqual(await f.client.leaderboard({period:'week',nickname:'이전 닉네임'}),[]);
+  assert.match(f.calls[0].url,/\/rpc\/fromis_nickname_leaderboard$/u);
+  for(const call of f.calls)assert.deepEqual(call.body,{p_period:'week',p_device:'pc',p_limit:10});
+  assert.equal(f.calls.length,3);assert.deepEqual(f.storageCalls,[]);
 });
 
-test('personal records can be looked up by an explicitly supplied nickname with no login',async()=>{
-  const result={nickname:'ㄱㅇㄴ',best:{elapsed_ms:123456},weekBest:null,completedRuns:1,recent:[]};
-  const f=fixture([reply(result)]);
-  assert.deepEqual(await f.client.personal({nickname:'ㄱㅇㄴ'}),result);
+test('online rankings can load without a nickname while personal lookup is unavailable',async()=>{
+  const rows=[{rank:1,nickname:'ㄱㅇㄴ',elapsed_ms:123456,cpm:350,accuracy:99,is_me:false}];
+  const f=fixture([reply(rows)],{nickname:''});
+  assert.equal(f.client.personal,undefined);
+  assert.deepEqual(await f.client.leaderboard({period:'all'}),rows);
   assert.equal(f.calls.length,1);assert.equal(f.calls[0].options.headers.Authorization,undefined);assert.deepEqual(f.storageCalls,[]);
-  const empty=fixture([],{nickname:''});
-  await assert.rejects(empty.client.personal(),{code:'nickname-required'});assert.equal(empty.calls.length,0);
+  assert.deepEqual(f.calls[0].body,{p_period:'all',p_device:'pc',p_limit:10});
 });
 
 test('only a full completion sends one record with its stable ID, nickname and device',async()=>{
@@ -125,13 +130,11 @@ test('nicknames accept only kkobak initials, ASCII digits and symbols, from one 
   }
 });
 
-test('invalid nicknames never reach nickname or ranking RPCs',async()=>{
+test('invalid nicknames are rejected locally before a completion can be submitted',async()=>{
   for(const nickname of ['완성형','English','ㄱ 1','ㄱ'.repeat(7),'ㅏ']){
     const f=fixture();
     assert.throws(()=>f.client.useNickname(nickname),{code:'invalid-nickname'});
     await assert.rejects(f.client.finishRun({...complete,nickname}),{code:'invalid-nickname'});
-    await assert.rejects(f.client.personal({nickname}),{code:'invalid-nickname'});
-    await assert.rejects(f.client.leaderboard({nickname}),{code:'invalid-nickname'});
     assert.equal(f.calls.length,0);
   }
   const f=fixture();assert.equal(f.client.useNickname('ㄱ'),'ㄱ');assert.equal(f.calls.length,0);

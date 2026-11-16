@@ -6,7 +6,7 @@
 
 1. 기존 프로젝트의 **SQL Editor → New query**에서 [schema.sql](schema.sql) **전체를 실행**합니다. 새 설치와 기존 9개 컬럼 구조 변경 모두 같은 파일을 사용합니다.
 2. 게임을 새로고침하고 닉네임을 입력해 플레이합니다.
-3. 전체 14앨범·67곡을 완주하면 주간·전체·개인 기록에 반영됩니다. 선택 앨범 연습은 이 기기에만 기록합니다.
+3. 전체 14앨범·67곡을 완주하면 온라인 주간·전체 랭킹에 반영됩니다. 개인 기록 화면과 개인 최고는 전체·선택 코스 모두 이 브라우저에 저장된 기록만 사용합니다.
 
 SQL은 한 트랜잭션으로 실행하며 재실행할 수 있습니다. 기존 `fromis_nickname_runs`의 **완료 행과 기록 ID는 모두 보존**합니다. 이전 시작 요청인 `finished_at IS NULL` 행만 제거하고, `course_version`, `started_at`과 예전 불필요한 컬럼을 제거합니다. 이전 시작·닉네임 등록·완주 함수도 제거하여 캐시된 화면이 새 미완료 행을 만들 수 없게 합니다.
 
@@ -46,13 +46,12 @@ SQL은 한 트랜잭션으로 실행하며 재실행할 수 있습니다. 기존
 
 ## 순위와 공개 연결
 
-주간은 최근 7일, 전체는 모든 완료 기록입니다. PC·모바일별로 같은 닉네임의 가장 빠른 한 기록을 표시합니다. 동률이면 정확도·완주 시각·ID 순서입니다. 개인 기록은 해당 이름의 최고 기록과 최근 완료 기록을 조회합니다.
+주간은 최근 7일, 전체는 모든 완료 기록입니다. PC·모바일별로 같은 닉네임의 가장 빠른 한 기록을 표시합니다. 동률이면 정확도·완주 시각·ID 순서입니다. 개인 기록 화면과 최고 기록·완주 횟수는 로컬 저장소만 조회합니다. 이전 SQL을 적용한 프로젝트는 [disable-online-personal.sql](disable-online-personal.sql)을 실행하면 사용하지 않는 온라인 개인 조회 함수도 제거됩니다. 기록 데이터와 온라인 주간·전체 랭킹에는 영향을 주지 않습니다.
 
-API는 다음 세 가지입니다.
+현재 사용하는 API는 다음 두 가지입니다.
 
 - `fromis_nickname_submit(p_id, p_nickname, p_device, p_album_ids, p_completed_track_count, p_elapsed_ms, p_correct_strokes, p_attempted_strokes)`
 - `fromis_nickname_leaderboard(p_period, p_device, p_limit, p_nickname)`
-- `fromis_nickname_personal(p_device, p_nickname)`
 
 `dist/data/ranking-config.json`에는 기존 프로젝트의 공개 publishable 키만 사용합니다. `sb_secret_` 또는 `service_role` 키는 프런트에서 거부합니다. 사용자 생성·로그인·JWT 저장은 하지 않습니다.
 

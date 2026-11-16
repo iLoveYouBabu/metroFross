@@ -20,6 +20,7 @@ drop function if exists public.fromis_nickname_finish(uuid,uuid,integer,bigint,i
 drop function if exists public.fromis_nickname_finish(uuid,integer,bigint,integer,integer);
 drop function if exists public.fromis_nickname_leaderboard(text,text,text,integer,text);
 drop function if exists public.fromis_nickname_personal(text,text,text);
+drop function if exists public.fromis_nickname_personal(text,text);
 
 -- Also support an upgrade from the earlier three-table nickname schema.
 -- Detach only known game foreign keys; keep all historical run rows.
@@ -136,30 +137,7 @@ begin
 end;
 $function$;
 
-create or replace function public.fromis_nickname_personal(p_device text default 'pc',p_nickname text default null)
-returns jsonb language plpgsql stable security definer set search_path = '' as $function$
-declare
-  v_nickname text:=btrim(regexp_replace(normalize(p_nickname,NFC),'\s+',' ','g'));
-  v_best jsonb;
-  v_week jsonb;
-  v_recent jsonb;
-  v_count bigint;
-begin
-  if v_nickname is null or (v_nickname collate "C") !~ $pattern$^[ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎᄀ-ᄒ\x21-\x40\x5b-\x60\x7b-\x7e]{1,6}$$pattern$ then raise exception 'INVALID_NICKNAME'; end if;
-  if p_device is null or p_device not in ('pc','mobile') then raise exception 'INVALID_RUN'; end if;
-  select jsonb_build_object('run_id',r.id,'nickname',r.nickname,'elapsed_ms',r.elapsed_ms,'cpm',r.cpm,'accuracy',r.accuracy,'finished_at',r.finished_at,'device',r.device)
-    into v_best from public.fromis_nickname_runs r where r.nickname=v_nickname and r.device=p_device order by r.elapsed_ms,r.accuracy desc,r.finished_at,r.id limit 1;
-  select jsonb_build_object('run_id',r.id,'nickname',r.nickname,'elapsed_ms',r.elapsed_ms,'cpm',r.cpm,'accuracy',r.accuracy,'finished_at',r.finished_at,'device',r.device)
-    into v_week from public.fromis_nickname_runs r where r.nickname=v_nickname and r.device=p_device and r.finished_at>=now()-interval '7 days' order by r.elapsed_ms,r.accuracy desc,r.finished_at,r.id limit 1;
-  select count(*) into v_count from public.fromis_nickname_runs r where r.nickname=v_nickname and r.device=p_device;
-  select coalesce(jsonb_agg(to_jsonb(recent) order by recent.finished_at desc),'[]'::jsonb) into v_recent from(
-    select r.id as run_id,r.nickname,r.elapsed_ms,r.cpm,r.accuracy,r.finished_at,r.device from public.fromis_nickname_runs r where r.nickname=v_nickname and r.device=p_device order by r.finished_at desc,r.id limit 5
-  )recent;
-  return jsonb_build_object('nickname',v_nickname,'best',v_best,'weekBest',v_week,'completedRuns',v_count,'recent',v_recent);
-end;
-$function$;
-
-revoke all on function public.fromis_nickname_submit(uuid,text,text,text[],integer,bigint,integer,integer),public.fromis_nickname_leaderboard(text,text,integer,text),public.fromis_nickname_personal(text,text) from public,anon,authenticated;
-grant execute on function public.fromis_nickname_submit(uuid,text,text,text[],integer,bigint,integer,integer),public.fromis_nickname_leaderboard(text,text,integer,text),public.fromis_nickname_personal(text,text) to anon,authenticated;
+revoke all on function public.fromis_nickname_submit(uuid,text,text,text[],integer,bigint,integer,integer),public.fromis_nickname_leaderboard(text,text,integer,text) from public,anon,authenticated;
+grant execute on function public.fromis_nickname_submit(uuid,text,text,text[],integer,bigint,integer,integer),public.fromis_nickname_leaderboard(text,text,integer,text) to anon,authenticated;
 notify pgrst,'reload schema';
 commit;

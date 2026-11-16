@@ -64,13 +64,12 @@ export function createRankingClient(options = {}) {
 
   return {
     configured, device, useNickname, getNickname: () => nickname,
-    async leaderboard({ period = 'week', device: selectedDevice = device, limit = 10, nickname: selected = nickname } = {}) {
+    async leaderboard({ period = 'week', device: selectedDevice = device, limit = 10 } = {}) {
       if (!['week','all'].includes(period)) throw new RankingError('invalid-period', '랭킹 기간을 확인해주세요.');
-      const result = await rpc('fromis_nickname_leaderboard', { p_period: period, p_device: deviceName(selectedDevice), p_limit: Math.min(50, Math.max(1, Number(limit) || 10)), p_nickname: selected ? normalizeNickname(selected) : null });
+      const result = await rpc('fromis_nickname_leaderboard', { p_period: period, p_device: deviceName(selectedDevice), p_limit: Math.min(50, Math.max(1, Number(limit) || 10)) });
       if (!Array.isArray(result)) throw new RankingError('invalid-response', '랭킹 목록을 확인하지 못했어요.');
       return result;
     },
-    async personal({ device: selectedDevice = device, nickname: selected = nickname } = {}) { return rpc('fromis_nickname_personal', { p_device: deviceName(selectedDevice), p_nickname: selectedNickname(selected) }); },
     async finishRun({ runId, fullCourse, albumIds: selected, nickname: selectedName = nickname, device: selectedDevice = device, completedTrackCount, elapsedMs, correctStrokes, attemptedStrokes } = {}) {
       if (!fullCourse || !fullSelection(selected)) return { eligible: false, reason: 'practice' };
       if (completedTrackCount !== options.trackCount || !uuid(runId) || !Number.isFinite(elapsedMs) || Math.round(elapsedMs) <= 0 || elapsedMs > 14400000 || !Number.isSafeInteger(correctStrokes) || correctStrokes <= 0 || !Number.isSafeInteger(attemptedStrokes) || attemptedStrokes < correctStrokes || attemptedStrokes > 100000) throw new RankingError('invalid-run', '완주 기록을 확인하지 못했어요.');
